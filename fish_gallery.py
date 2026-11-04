@@ -5,11 +5,16 @@ import html
 import json
 from pathlib import Path
 from fish_similarity import build_similarity
+from species import build_species, export_species
 
 
 def write_gallery(out, tracks, run):
     out = Path(out)
     similarity = build_similarity(out, tracks)
+    policy_path = out / 'species_predictions.json'
+    policy = json.loads(policy_path.read_text()) if policy_path.exists() else {}
+    species = build_species(out, tracks, threshold=policy.get('threshold', .8), margin=policy.get('margin', .2))
+    species_rows = {r["track_id"]: r for r in export_species(out, species)}
     ordered = sorted(tracks, key=lambda t: (float(t['first_s']), int(t['track_id'])))
     group_by_id = {ident: n for n, group in enumerate(similarity['groups'], 1) for ident in group}
     cards = []
@@ -23,13 +28,19 @@ def write_gallery(out, tracks, run):
         detail = html.escape(f"{track['first_s']}–{track['last_s']} seconds · {track['detections']} detections · peak confidence {track['best_confidence']}")
         if int(track['detections']) < 15:
             detail += ' · brief track'
-        cards.append(f'<article data-group="{group_by_id.get(ident, 0)}"><h2>Fish {ident:04d}</h2>{image}<p>{detail}</p><p class="muted">Unreviewed · species unassigned</p></article>')
+        review = species_rows[ident]
+        options = '<option value="unidentified">Unidentified / unknown</option>' + ''.join(f'<option value="{html.escape(k, quote=True)}">{html.escape(v["scientific_name"])}</option>' for k, v in sorted(species['catalog'].items()))
+        control = f'<p>{html.escape(review["species_id"])} · {html.escape(review["status"])} · model score {review["model_confidence"] if review["model_confidence"] is not None else "unavailable"}</p><label>Review species <select class="species-choice" data-track="{ident}">{options}</select></label><label>Review note <input class="review-note" data-track="{ident}"></label><button type="button" class="mark-reviewed" data-track="{ident}">Mark reviewed</button><span class="review-state" data-track="{ident}"></span>'
+        cards.append(f'<article data-group="{group_by_id.get(ident, 0)}"><h2>Fish {ident:04d}</h2>{image}<p>{detail}</p>{control}</article>')
     disabled = '' if similarity['status'] == 'ready' else ' disabled'
     page = '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>Fish Gallery</title><style>
 body{font:16px system-ui;background:#eef5f4;color:#143132;margin:32px}main{max-width:1400px;margin:auto}p{line-height:1.6}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}article{background:white;padding:18px;border-radius:12px}h2{font-size:20px}img{width:100%;height:210px;object-fit:contain;background:#102a2b}.muted{color:#536d6e;font-size:14px}select{font:inherit;padding:8px}section{margin:24px 0}</style></head><body><main><h1>Fish Gallery</h1>'''
     page += f'<p>{len(tracks)} provisional tracks · {run["total_frames"]/run["source_fps"]:.3f} seconds · {html.escape(run["model"])} · all {run["total_frames"]:,} frames processed.</p>'
     page += '<p>IDs identify continuous sightings. Occlusion and re-entry can create duplicate or swapped IDs. This is not a count of unique fish. Similar appearance does not establish species or individual identity.</p>'
     page += f'<label for="sort-order">Sort order </label><select id="sort-order"><option value="chronological">Chronological</option><option value="similarity"{disabled}>Visual similarity</option></select><p role="status">{html.escape(similarity["message"])}</p><div id="gallery"><div class="grid">' + ''.join(cards) + '</div></div>'
+    page += '<p>Species scores are model outputs, not measured accuracy. Review edits must be downloaded and imported to persist.</p><label>Reviewer <input id="reviewer"></label><button id="download-reviews">Download reviews</button><p id="review-message" role="status"></p>'
+    page += '<script type="application/json" id="species-data">' + json.dumps(dict(dataset_sha256=species['dataset_sha256'], tracks=list(species_rows.values()))).replace('<', '\\u003c') + '</script>'
+    page += '<script>' + (Path(__file__).parent / 'species_review.js').read_text() + '</script>'
     page += '''</main><script>
 const gallery = document.getElementById('gallery');
 const cards = Array.from(gallery.querySelectorAll('article'));

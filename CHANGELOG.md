@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 — 2026-11-04
+
+- Added a modular offline image-classification adapter with explicit catalogue/logit mapping and model file hashes; no classifier weights or performance claims are bundled.
+- Added bounded per-crop scoring and equal-weight track aggregation, configurable score/margin gates, provisional assignments and explicit unidentified reasons.
+- Added per-track gallery review, unknown selection, notes, reviewer and timestamp, downloadable review imports, validated correction history and reproducible JSON/CSV exports.
+- Bound review imports to track and run metadata hashes; preserved model predictions independently of human corrections and retained review history on reruns.
+- Added a small, extensible Caribbean starter catalogue for manual review, workflow/model contract documentation and species regression tests.
+- Appearance groups remain browsing aids and never propagate species assignments. Default score gates are exploratory; open-set rejection, score calibration and field performance require validation.
+
+
 ## 0.4.0 — 2026-11-04
 
 First source release to `marine-ecologist/openfish`; includes the existing desktop app and the Fish Gallery visual-similarity implementation.
