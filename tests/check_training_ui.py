@@ -38,7 +38,10 @@ with tempfile.TemporaryDirectory() as directory:
     assert panel.outcome.currentData()=='species'
     assert panel.note.text()=='Temporary test label; not expert truth'
     # Capture a pending track so the screenshot contains no synthetic species label.
-    panel.store.data['labels']={};panel.drafts={};panel.refresh_rows();window.refresh_species_columns();panel.reviewer.clear()
+    panel.current=None
+    for name in ['training_labels.json','training_drafts.json']:
+        if (out/name).exists():(out/name).unlink()
+    panel.load(out,window.tracks);window.refresh_species_columns();panel.reviewer.clear()
     row=next((n for n,t in enumerate(window.tracks) if len(panel.store.samples[int(t['track_id'])])==4),5)
     panel.table.selectRow(row);window.navigate(4);app.processEvents();window.grab().save(str(screenshot))
     assert len(panel.pictures)==4
