@@ -45,6 +45,8 @@ class TrainingStore:
         self.catalog = json.loads((Path(__file__).parent/'catalogs/caribbean_training.json').read_text())
         predictions = self.out/'species_predictions.json'
         if predictions.exists(): self.catalog.update(json.loads(predictions.read_text()).get('catalog', {}))
+        catalog_path=self.out/'training_catalog.json'
+        if catalog_path.exists():self.catalog.update(json.loads(catalog_path.read_text()))
         self.path = self.out/'training_labels.json'
         self.data = dict(schema_version=1, dataset_sha256=self.fingerprint, labels={}, history=[])
         if self.path.exists():
@@ -70,6 +72,7 @@ class TrainingStore:
         # Save first; a failed disk write must not change the in-memory review.
         updated = json.loads(json.dumps(self.data))
         updated['labels'][str(ident)] = row; updated['history'].append(row)
+        atomic_json(self.out/'training_catalog.json', self.catalog)
         atomic_json(self.path, updated); self.data = updated
 
     @property

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 — 2026-11-04
+
+- Added project export/import with bundled original video, result/ID folders, classifications, drafts, training snapshots and a pinned manual catalogue.
+- Imported projects appear in the local Projects library without detection reruns; relative source paths preserve portability while original run files remain unchanged.
+- New desktop processing runs now keep their copied source video and processing outputs inside one discrete project folder.
+- Added background copy/verification, checksums, safe-path checks, non-overwriting imports and round-trip tests for review persistence and re-export.
+
+
 ## 0.6.0 — 2026-11-04
 
 - Replaced the sidebar logo and macOS app icon with a transparent, left-facing teal fish clipart mark; retained SVG and PNG assets.
