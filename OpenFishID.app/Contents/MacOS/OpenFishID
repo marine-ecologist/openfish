@@ -1,0 +1,14 @@
+#!/bin/bash
+set -eu
+OPENFISH_ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
+export PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+export PYTHONUNBUFFERED=1
+export MPLCONFIGDIR="$OPENFISH_ROOT/.runtime/matplotlib"
+export YOLO_CONFIG_DIR="$OPENFISH_ROOT/.runtime"
+mkdir -p "$OPENFISH_ROOT/.runtime"
+cd "$OPENFISH_ROOT"
+OPENFISH_UI_PYTHON="$OPENFISH_ROOT/.ui-venv/bin/python"
+if [ ! -x "$OPENFISH_UI_PYTHON" ]; then
+  OPENFISH_UI_PYTHON=/Users/heliopora/GitHub/openreef/.venv/bin/python
+fi
+exec "$OPENFISH_UI_PYTHON" "$OPENFISH_ROOT/openfishid_gui.py" "$@" >> "$OPENFISH_ROOT/.runtime/desktop.log" 2>&1

@@ -1,0 +1,12 @@
+.venv/
+.runtime/
+__pycache__/
+models/
+wheelhouse/
+outputs/
+*.MP4
+*.mp4
+
+.ui-venv/
+.DS_Store
+*.pyc

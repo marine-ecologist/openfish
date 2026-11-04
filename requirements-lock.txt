@@ -1,0 +1,69 @@
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.16.0
+av==19.0.2
+certifi==2026.10.23
+charset-normalizer==3.5.2
+click==8.5.0
+contourpy @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/contourpy-1.4.0-cp315-cp315-macosx_11_0_arm64.whl#sha256=6f963ea9f0d68d2b6a02d861e3c0aae09ae25ba21f243fcf281e9fed468b078d
+cycler @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/cycler-0.12.1-py3-none-any.whl#sha256=85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30
+defusedxml==0.7.1
+filelock==4.2.7
+fonttools @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/fonttools-4.68.0-cp315-cp315-macosx_10_15_universal2.whl#sha256=ab6505dfbe3199453d8542b25f55c1ea3260d38029d9db58c0c7304d438abdc0
+fsspec==2026.9.0
+h11==0.16.0
+hf-xet==1.8.0
+httpcore==1.0.9
+httpcore2==2.16.0
+httpx==0.28.1
+httpx2==2.16.0
+huggingface_hub==2.4.0
+idna==3.20
+Jinja2==3.1.6
+kiwisolver @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/kiwisolver-1.5.1-cp315-cp315-macosx_11_0_arm64.whl#sha256=18170a77ddfecf40ec60d0928268dc95880c881864e015a8f34094ed18b9b9ad
+lap @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/lap-0.5.14-cp315-cp315-macosx_11_0_arm64.whl#sha256=ba99f2ea9eb592ea7561f9d67d9c046eef258ca7c847232d6a35c79c7bfe3324
+markdown-it-py==4.2.0
+MarkupSafe==3.0.4
+matplotlib @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/matplotlib-3.11.2-cp315-cp315-macosx_11_0_arm64.whl#sha256=bbf1062991d826ed27e2144f3afa4461afbb8ff56e8f703043e191a8163b1ee9
+mdurl==0.1.2
+mpmath==1.3.0
+networkx==3.7
+numpy @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/numpy-2.5.4-cp315-cp315-macosx_14_0_arm64.whl#sha256=0b4724a19de67bea8cfc4970798efa78bcbbe2ac2613cfac16721a42d44de2a5
+nvidia-ml-py @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/nvidia_ml_py-13.615.71-py3-none-any.whl#sha256=959bf4adf6fe1308e4bd739e722236b0d1ec8392e2cefad33ff70c311380b9b6
+opencv-python @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/opencv_python-5.0.0.93-cp37-abi3-macosx_13_0_arm64.whl#sha256=198a75138241810206a17c829dbcc40a7cb1841cda538ca86cbbfc6c7d95f898
+packaging==26.3
+pillow==13.0.0
+polars==2.1.0
+polars-runtime-32 @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/polars_runtime_32-2.1.0-cp311-abi3-macosx_11_0_arm64.whl#sha256=317314d65949f1d58c4939adf83aa0d2cfaf8da50fd4a725a2de27bde2c10018
+psutil==7.2.2
+pydantic==2.14.2
+pydantic_core==2.50.2
+pyDeprecate==0.9.0
+Pygments==2.21.0
+pyparsing==3.3.3
+python-dateutil==4.0.0
+PyYAML==6.0.3
+regex==2026.9.29
+requests==2.34.2
+rfdetr==1.11.2
+rich==15.0.0
+safetensors==0.8.0
+scipy==1.18.1
+setuptools==84.2.1
+shellingham==1.5.4
+supervision==0.31.4
+sympy==1.14.0
+tokenizers==0.23.3
+torch @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/torch-2.15.0-cp315-cp315-macosx_14_0_arm64.whl#sha256=06a686eb717cd3d1662363082820be45497318887c596d691af0af0c7649c8f0
+torchvision @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/torchvision-0.29.2-py3-none-macosx_14_0_arm64.whl#sha256=d412494ff011f24c884a3cffd33eba1cb45a0299d4e26c1e175113f9d3b3ebc7
+tqdm==4.70.1
+transformers==5.22.1
+truststore==0.10.5
+typer==0.27.3
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+tzdata==2026.6
+ultralytics @ file:///Users/heliopora/Documents/ChatGPT/openFishID/wheelhouse/ultralytics-8.4.202-py3-none-any.whl#sha256=ae71dc5bb1024010fbdef5bd9281984ddd8c70885bddcfdd6aff0801b7015fb4
+ultralytics-platform==0.1.102
+ultralytics-thop==2.2.4
+urllib3==2.8.0
