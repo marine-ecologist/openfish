@@ -36,17 +36,12 @@ with tempfile.TemporaryDirectory() as directory:
     panel.move_track(1);panel.move_track(-1);assert not panel.checks[0].isChecked()
     reopened=TrainingPanel();reopened.load(out,tracks);assert reopened.store.label(1)['approved']==[]
     assert not reopened.export_button.isEnabled()
-    gallery.controls[1].setCurrentIndex(gallery.controls[1].findData('sparisoma_viride'))
-    assert panel.store.label(1)['phase']=='unassessed'
-    gallery.phase_controls[1].setCurrentIndex(gallery.phase_controls[1].findData('terminal'))
-    assert panel.store.label(1)['phase']=='terminal'
-    assert panel.store.label(2)['phase']=='unassessed' # species propagates; phase does not
+    gallery.controls[1].setCurrentIndex(gallery.controls[1].findData('sparisoma_viride__TP'))
+    assert panel.store.label(1)['species_id']=='sparisoma_viride__TP'
+    assert gallery.controls[1].currentText()=='Sparisoma viride [TP]'
     gallery.open_individual(1)
-    assert panel.phase.currentData()=='terminal'
-    panel.phase.setCurrentIndex(panel.phase.findData('initial'))
-    assert panel.store.label(1)['phase']=='initial'
-    gallery.controls[1].setCurrentIndex(gallery.controls[1].findData('acanthurus_coeruleus'))
-    assert panel.store.label(1)['phase']=='not_applicable'
-    assert not gallery.phase_controls[1].isEnabled()
+    panel.species.setCurrentIndex(panel.species.findData('sparisoma_viride__J'))
+    assert panel.store.label(1)['species_id']=='sparisoma_viride__J'
+    assert panel.table.columnCount()==5
     panel.close();restored.close();reopened.close()
 print('Gallery propagation, reviewer-gated autosave, exception, ticks and crop autosave passed')

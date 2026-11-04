@@ -4,12 +4,12 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap,QStandardItemModel,QStandardItem
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,QComboBox,QPushButton,QScrollArea,QFrame,QMessageBox
 from training import atomic_json
-from fish_phase import PHASES,is_parrotfish
+from species_labels import title
 
 
 class TrainingGallery(QWidget):
     def __init__(self, panel):
-        super().__init__();self.panel=panel;self.store=None;self.pending={};self.controls={};self.phase_controls={};self.phase_labels={};self.ticks={};self.group_ticks=[];self.groups=[];self.group_controls=[];self.changing=False
+        super().__init__();self.panel=panel;self.store=None;self.pending={};self.controls={};self.ticks={};self.group_ticks=[];self.groups=[];self.group_controls=[];self.changing=False
         layout=QVBoxLayout(self)
         note=QLabel('Step 1 · Assign species to appearance groups, check each fish. Valid choices save automatically after you enter a reviewer name. Similar appearance does not establish species identity. Use Unidentifiable for individual exceptions.');note.setWordWrap(True);layout.addWidget(note)
         self.scroll=QScrollArea();self.scroll.setWidgetResizable(True);layout.addWidget(self.scroll)
@@ -20,12 +20,12 @@ class TrainingGallery(QWidget):
         return box
 
     def load(self, store):
-        self.store=store;self.pending={};self.controls={};self.phase_controls={};self.phase_labels={};self.ticks={};self.group_ticks=[];self.groups=[];self.group_controls=[]
+        self.store=store;self.pending={};self.controls={};self.ticks={};self.group_ticks=[];self.groups=[];self.group_controls=[]
         if not store:return
         self.choice_model=QStandardItemModel(self)
-        entries=[('Unreviewed · species unassigned',None)]+[(v['scientific_name'],k) for k,v in sorted(store.catalog.items(),key=lambda p:p[1]['scientific_name'])]+[('Unidentifiable','unidentified')]
-        for title,key in entries:
-            item=QStandardItem(title);item.setData(key,Qt.ItemDataRole.UserRole);self.choice_model.appendRow(item)
+        entries=[('Unreviewed · species unassigned',None)]+[(title(v),k) for k,v in sorted(store.catalog.items(),key=lambda p:(p[1]['scientific_name'],0 if p[0].endswith('__TP') else 1))]+[('Unidentifiable','unidentified')]
+        for text,key in entries:
+            item=QStandardItem(text);item.setData(key,Qt.ItemDataRole.UserRole);self.choice_model.appendRow(item)
         self.path=store.out/'training_gallery_drafts.json'
         if self.path.exists():
             saved=json.loads(self.path.read_text())
@@ -45,15 +45,10 @@ class TrainingGallery(QWidget):
             self.group_ticks.append((members,tick));self.group_controls.append((members,group_box))
             grid=QGridLayout()
             for n,ident in enumerate(members):
-                card=QWidget();cl=QVBoxLayout(card);title=QHBoxLayout();title.addWidget(QLabel(f'Fish {ident:04d}'));saved=QLabel();title.addWidget(saved);cl.addLayout(title);self.ticks[ident]=saved
+                card=QWidget();cl=QVBoxLayout(card);heading=QHBoxLayout();heading.addWidget(QLabel(f'Fish {ident:04d}'));saved=QLabel();heading.addWidget(saved);cl.addLayout(heading);self.ticks[ident]=saved
                 image=QLabel();image.setAlignment(Qt.AlignmentFlag.AlignCenter);pix=QPixmap(str(store.out/'crops'/f'fish_{ident:04d}.jpg'));image.setPixmap(pix.scaled(220,140,Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation));cl.addWidget(image)
                 choice=self.choice();choice.setMinimumWidth(160);choice.setMaximumWidth(280);cl.addWidget(choice);self.controls[ident]=choice
                 choice.currentIndexChanged.connect(lambda _,i=ident,m=members,b=choice:self.individual_choice(i,m,b.currentData()))
-                phase_label=QLabel('Parrotfish visual phase');cl.addWidget(phase_label);self.phase_labels[ident]=phase_label
-                phase=QComboBox()
-                for key,title in PHASES:phase.addItem(title,key)
-                phase.setToolTip('Individual visual phase, not confirmed sex. Never propagated to the appearance group.');cl.addWidget(phase);self.phase_controls[ident]=phase
-                phase.currentIndexChanged.connect(lambda _,i=ident,b=phase:self.save_phase(i,b.currentData()))
                 grid.addWidget(card,n//3,n%3)
             sl.addLayout(grid);outer.addWidget(section);self.groups.append(members)
         outer.addStretch();self.scroll.setWidget(content);self.refresh()
@@ -77,20 +72,6 @@ class TrainingGallery(QWidget):
             self.pending[ident]=value;self.persist();self.refresh();self.panel.refresh_rows();self.commit_ready()
         else:self.assign(members,value)
 
-    def save_phase(self,ident,phase):
-        if self.changing:return
-        old=self.store.label(ident)
-        if not old or not is_parrotfish(old.get('species_id'),self.store.catalog):return
-        if not self.panel.reviewer.text().strip():
-            self.panel.message.setText('Enter a reviewer name before setting phase.');self.refresh();return
-        try:
-            self.panel.remember();draft=self.panel.drafts.get(ident,{})
-            approved=old['approved']
-            if 'checks' in draft:approved=[s['sha256'] for s,c in zip(self.store.samples[ident],draft['checks']) if c]
-            self.store.save(ident,old['status'],old['species_id'],self.panel.reviewer.text().strip(),draft.get('note',old.get('note','')),approved,phase=phase)
-            self.panel.drafts.pop(ident,None);self.panel.reload_current();self.panel.refresh_rows();self.panel.labels_changed.emit();self.refresh()
-        except (OSError,ValueError) as exc:self.panel.message.setText('Phase not saved: '+str(exc));self.refresh()
-
     def commit_ready(self):
         if self.changing or not self.panel.reviewer.text().strip():return
         members=[i for i,v in self.pending.items() if v is not None]
@@ -101,7 +82,6 @@ class TrainingGallery(QWidget):
         self.changing=True
         for ident,control in self.controls.items():
             value=self.pending.get(ident,self.value(ident));control.setCurrentIndex(max(0,control.findData(value)))
-            phase=self.phase_controls[ident];label=self.store.label(ident);applicable=is_parrotfish(label.get('species_id'),self.store.catalog);phase.setVisible(applicable);self.phase_labels[ident].setVisible(applicable);phase.setEnabled(ident not in self.pending and is_parrotfish(label.get('species_id'),self.store.catalog));phase.setCurrentIndex(max(0,phase.findData(label.get('phase','unassessed'))))
             self.ticks[ident].setText('✓ Saved' if self.store.label(ident) and ident not in self.pending else 'Unsaved' if ident in self.pending else '')
         for members,box in self.group_controls:
             values={self.pending.get(i,self.value(i)) for i in members};value=next(iter(values)) if len(values)==1 else None
@@ -119,7 +99,7 @@ class TrainingGallery(QWidget):
                 old=self.store.label(ident);draft=self.panel.drafts.get(ident,{})
                 approved=old.get('approved',[s['sha256'] for s in self.store.samples[ident]])
                 if 'checks' in draft:approved=[s['sha256'] for s,checked in zip(self.store.samples[ident],draft['checks']) if checked]
-                rows.append(dict(track_id=ident,phase=old.get('phase') if value==old.get('species_id') else None,status='unidentified' if value=='unidentified' else 'species',species_id=None if value=='unidentified' else value,
+                rows.append(dict(track_id=ident,status='unidentified' if value=='unidentified' else 'species',species_id=None if value=='unidentified' else value,
                     reviewer=self.panel.reviewer.text().strip(),note=draft.get('note',old.get('note','')),approved=approved))
             self.store.save_group(rows)
             for ident in members:self.pending.pop(ident,None);self.panel.drafts.pop(ident,None)

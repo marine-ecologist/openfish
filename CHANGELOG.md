@@ -2,12 +2,11 @@
 
 ## 0.7.3 — 2026-11-04
 
-- Added separate manual parrotfish visual-phase annotation in Training Gallery and Individual, with Viewer/track-table columns and autosaving.
-- Added juvenile, initial, terminal, transitional appearance, uncertain and unassessed options; non-parrotfish/unidentified tracks use Not applicable.
-- Phase is per fish, never propagated with group species; changing species resets it safely.
-- Retained phase in review history, portable projects and training CSV/JSON exports; old labels receive unassessed/Not applicable defaults.
-- Added regression checks for phase applicability, legacy migration, export round trips and cross-view editing. No automated phase classifier or sex inference is introduced.
-
+- Added combined parrotfish species labels [J], [IP] and [TP], with [TP] first/default in each species' choices.
+- Kept ordinary labels for other fishes; removed separate phase controls, columns and phase-specific training fields.
+- Displayed combined labels consistently in Gallery, Individual and Viewer; saved them in portable projects and species-labelled training exports, alongside base taxonomic identity.
+- Migrated prior known J/IP/TP annotations without changing uncertain legacy records into TP, preserving audit history.
+- Added combined-label migration, project round-trip and cross-view autosave regression coverage. No automated form classifier or sex inference is introduced.
 
 ## 0.7.2 — 2026-11-04
 

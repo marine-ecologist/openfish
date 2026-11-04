@@ -12,7 +12,7 @@ Videos are processed locally on your Mac, so your footage stays with you.
 - **Review sightings** with annotated playback, frame-by-frame viewing and a searchable fish list.
 - **Explore the Fish Gallery** chronologically or in groups of similar-looking fish.
 - **Improve underwater visibility** with adjustable color correction and preview comparisons.
-- **Record parrotfish visual phases** alongside species, with [phase-aware review and exports](docs/parrotfish-phase.md).
+- **Label parrotfish as species [J], [IP] or [TP]** using [combined species-label review and exports](docs/parrotfish-phase.md).
 - **Build a training dataset** in the [Training workspace](docs/training.md), with track labels, crop approval and versioned exports.
 - **Review species assignments** in the Fish Gallery and export corrections with their review history.
 - **Share classified projects** through [portable project export/import](docs/projects.md), including video, crops and review records.

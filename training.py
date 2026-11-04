@@ -6,7 +6,7 @@ import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 from species import dataset_identity
-from fish_phase import normalize_phase
+from species_labels import expand,TAGS,title,parrotfish
 
 
 def atomic_json(path, value):
@@ -64,12 +64,20 @@ class TrainingStore:
             if key not in self.catalog:
                 if key in pinned:self.catalog[key]=pinned[key]
                 elif key in model_catalog:self.catalog[key]=model_catalog[key]
-        for row in self.data['labels'].values():row.setdefault('phase',normalize_phase(row.get('species_id'),self.catalog))
+        base_catalog=self.catalog.copy();self.catalog=expand(self.catalog)
+        for row in self.data['labels'].values():
+            key=row.get('species_id');phase=row.pop('phase',None)
+            if key in base_catalog and parrotfish(base_catalog[key]) and not base_catalog[key].get('base_species_id'):
+                if phase in TAGS:row['species_id']=key+'__'+TAGS[phase]
+                else:
+                    # Preserve a prior unspecific label without claiming it was TP.
+                    self.catalog[key]=base_catalog[key]
+
         self.samples = {ident: candidates(self.out, track) for ident, track in self.tracks.items()}
 
     def label(self, ident): return self.data['labels'].get(str(ident), {})
 
-    def save(self, ident, status, species_id, reviewer, note, approved, phase=None):
+    def save(self, ident, status, species_id, reviewer, note, approved):
         if dataset_identity(self.out) != self.fingerprint: raise ValueError('Run changed; reopen it before saving.')
         if ident not in self.tracks: raise ValueError('Unknown track')
         if status not in ('species', 'unidentified', 'excluded'): raise ValueError('Choose a review outcome')
@@ -77,7 +85,7 @@ class TrainingStore:
         if status == 'species' and species_id not in self.catalog: raise ValueError('Choose a species')
         available = {s['sha256']: s for s in self.samples[ident]}
         if set(approved)-set(available): raise ValueError('Unknown crop')
-        row = dict(track_id=ident, status=status, phase=normalize_phase(species_id if status=='species' else None,self.catalog,phase), species_id=species_id if status=='species' else None,
+        row = dict(track_id=ident, status=status, species_id=species_id if status=='species' else None,
                    reviewer=reviewer.strip(), note=note, approved=sorted(set(approved)),
                    reviewed_at=datetime.now(timezone.utc).isoformat())
         self.save_group([row])
@@ -93,7 +101,7 @@ class TrainingStore:
             if not row['reviewer'].strip():raise ValueError('Enter a reviewer name')
             if status=='species' and row['species_id'] not in self.catalog:raise ValueError('Choose a species')
             if set(row['approved'])-{s['sha256'] for s in self.samples[ident]}:raise ValueError('Unknown crop')
-            row['phase']=normalize_phase(row.get('species_id') if status=='species' else None,self.catalog,row.get('phase'))
+            row.pop('phase',None)
             row['reviewed_at']=datetime.now(timezone.utc).isoformat()
             updated['labels'][str(ident)]=row;updated['history'].append(row)
         atomic_json(self.out/'training_catalog.json',self.catalog)
@@ -121,14 +129,14 @@ class TrainingStore:
                 species_id = label['species_id']
                 # Hash-based directory names prevent external catalogue IDs becoming paths.
                 folder = hashlib.sha256(species_id.encode()).hexdigest()[:16]
-                rows.append(dict(track_id=ident, species_id=species_id, phase=label['phase'], scientific_name=self.catalog[species_id]['scientific_name'],
+                rows.append(dict(track_id=ident, species_id=species_id, label=title(self.catalog[species_id]), base_species_id=self.catalog[species_id].get('base_species_id',species_id), scientific_name=self.catalog[species_id]['scientific_name'],
                     image=f'images/{folder}/track_{ident}_{fingerprint[:16]}.jpg', source_crop=sample['path'],
                     sha256=fingerprint, width=sample['width'], height=sample['height'],
                     video_group=group_id, reviewer=label['reviewer']))
         manifest = dict(schema_version=1, dataset_sha256=self.fingerprint, source_video=source, video_group=group_id,
             grouping_policy='Keep this entire source video together when splitting training/evaluation. Group key is based on the recorded source path; deduplicate renamed copies across surveys.',
             crop_policy='Up to four available original-color images ranked by area and edge detail; exact duplicates removed; human approval required.',
-            phase_policy='Manual visual appearance only, not sex or maturity confirmation. Not assessed and uncertain phases are not phase-training ground truth.', reviewed_tracks=len(track_rows), training_images=len(rows), samples=rows, tracks=track_rows,
+            reviewed_tracks=len(track_rows), training_images=len(rows), samples=rows, tracks=track_rows,
             catalog={k:self.catalog[k] for k in sorted({r['species_id'] for r in rows})})
         version = hashlib.sha256(json.dumps(manifest, sort_keys=True).encode()).hexdigest()[:16]
         destination = self.out/'training_exports'/version
@@ -143,8 +151,8 @@ class TrainingStore:
             target = staging/row['image']; target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(self.out/row['source_crop'], target)
         atomic_json(staging/'manifest.json', manifest)
-        for name, values, columns in [('samples',rows,['track_id','species_id','phase','scientific_name','image','source_crop','sha256','width','height','video_group','reviewer']),
-            ('tracks',track_rows,['track_id','status','species_id','phase','reviewer','note','approved','reviewed_at'])]:
+        for name, values, columns in [('samples',rows,['track_id','species_id','base_species_id','label','scientific_name','image','source_crop','sha256','width','height','video_group','reviewer']),
+            ('tracks',track_rows,['track_id','status','species_id','reviewer','note','approved','reviewed_at'])]:
             with (staging/f'{name}.csv').open('w',newline='') as stream:
                 writer=csv.DictWriter(stream,fieldnames=columns);writer.writeheader();writer.writerows(values)
         (staging/'README.txt').write_text('Human-reviewed openFish training snapshot.\nOnly confirmed species with approved crops appear in samples.csv.\nUnidentified/excluded tracks remain in tracks.csv for audit, not supervised species training.\nNo model training or train/test split has been performed. Keep source videos/surveys together.\n')

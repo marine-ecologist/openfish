@@ -4,7 +4,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import (QTabBar,QStackedWidget,QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,QTableWidget,QTableWidgetItem,QHeaderView,QAbstractItemView,QSplitter,QLineEdit,QComboBox,QCheckBox,QPushButton,QMessageBox)
 import json
 from training import TrainingStore, atomic_json
-from fish_phase import PHASES,PHASE_DISPLAY,is_parrotfish
+from species_labels import title
 from ui.training_gallery import TrainingGallery
 
 
@@ -29,20 +29,16 @@ class TrainingPanel(QWidget):
         ll.addLayout(self.image_grid,1)
         form=QHBoxLayout();self.outcome=QComboBox();self.outcome.addItem('Choose review outcome…','pending');self.outcome.addItem('Species confirmed','species');self.outcome.addItem('Unidentifiable','unidentified');self.outcome.addItem('Exclude from training','excluded');form.addWidget(self.outcome)
         self.species=QComboBox();self.species.setEditable(True);self.species.setInsertPolicy(QComboBox.InsertPolicy.NoInsert);self.species.setMinimumWidth(200);form.addWidget(self.species,1);ll.addLayout(form)
-        phase_row=QHBoxLayout();phase_row.addWidget(QLabel('Parrotfish phase'));self.phase=QComboBox()
-        for key,title in PHASES:self.phase.addItem(title,key)
-        self.phase.setToolTip('Visual colour phase only. Initial phase can include females and primary males; this field does not confirm sex. Choose uncertain if markings are not clear.');phase_row.addWidget(self.phase,1);ll.addLayout(phase_row)
         self.note=QLineEdit();self.note.setPlaceholderText('Review note (optional)');ll.addWidget(self.note)
         self.save_button=QPushButton('Save track');self.save_button.setEnabled(False);self.save_button.clicked.connect(self.save_track);self.save_button.hide();ll.addWidget(self.save_button)
         self.message=QLabel('Choose a track, review the four images and save a species or an explicit review outcome.');self.message.setWordWrap(True);ll.addWidget(self.message)
         right=QWidget();rl=QVBoxLayout(right);rl.addWidget(QLabel('Fish tracks'));self.search=QLineEdit();self.search.setPlaceholderText('Find ID or species…');self.search.textChanged.connect(self.filter);rl.addWidget(self.search)
-        self.table=QTableWidget(0,6);self.table.setHorizontalHeaderLabels(['ID','First seen','Frames','Species','Review','Phase']);self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch);self.table.verticalHeader().hide();self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows);self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection);self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers);self.table.itemSelectionChanged.connect(self.selection_changed);rl.addWidget(self.table)
+        self.table=QTableWidget(0,5);self.table.setHorizontalHeaderLabels(['ID','First seen','Frames','Species','Review']);self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch);self.table.verticalHeader().hide();self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows);self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection);self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers);self.table.itemSelectionChanged.connect(self.selection_changed);rl.addWidget(self.table)
         split.addWidget(left);split.addWidget(right);split.setSizes([800,500]);layout.addWidget(split,1)
         note=QLabel('Step 2 · All available images are selected initially. Deselect images you do not want to train on. Changes save automatically. Unidentifiable tracks do not enter species training.');note.setWordWrap(True);layout.addWidget(note)
         self.outcome.currentIndexChanged.connect(self.outcome_changed)
         self.autosave_timer=QTimer(self);self.autosave_timer.setSingleShot(True);self.autosave_timer.setInterval(250);self.autosave_timer.timeout.connect(self.autosave);self.autosave_timer.timeout.connect(self.gallery.commit_ready)
         for check in self.checks:check.toggled.connect(self.autosave)
-        self.phase.currentIndexChanged.connect(self.autosave)
         self.outcome.currentIndexChanged.connect(self.autosave)
         self.species.currentIndexChanged.connect(self.autosave)
         self.note.textChanged.connect(lambda:self.autosave_timer.start() if not self.loading else None)
@@ -53,9 +49,9 @@ class TrainingPanel(QWidget):
 
     def remember(self):
         if self.current is not None and not self.loading and self.store:
-            value=dict(status=self.outcome.currentData(),species=self.species.currentText() if self.outcome.currentData()=='species' else 'Choose species…',note=self.note.text(),phase=self.phase.currentData() if self.phase.isEnabled() else 'not_applicable',checks=[c.isChecked() for c in self.checks])
+            value=dict(status=self.outcome.currentData(),species=self.species.currentText() if self.outcome.currentData()=='species' else 'Choose species…',note=self.note.text(),checks=[c.isChecked() for c in self.checks])
             label=self.store.label(self.current);samples=self.store.samples[self.current]
-            baseline=dict(status=label.get('status','pending'),species=self.store.catalog.get(label.get('species_id'),{}).get('scientific_name','Choose species…'),note=label.get('note',''),phase=label.get('phase','unassessed') if is_parrotfish(label.get('species_id'),self.store.catalog) else 'not_applicable',checks=[(i<len(samples) and (samples[i]['sha256'] in label.get('approved',[]) if label else True)) for i in range(4)])
+            baseline=dict(status=label.get('status','pending'),species=title(self.store.catalog[label['species_id']]) if label.get('species_id') in self.store.catalog else 'Choose species…',note=label.get('note',''),checks=[(i<len(samples) and (samples[i]['sha256'] in label.get('approved',[]) if label else True)) for i in range(4)])
             if value==baseline:self.drafts.pop(self.current,None)
             else:self.drafts[self.current]=value
             try:atomic_json(self.store.out/'training_drafts.json',dict(dataset_sha256=self.store.fingerprint,reviewer=self.reviewer.text(),drafts=self.drafts))
@@ -77,7 +73,7 @@ class TrainingPanel(QWidget):
         self.species.completer().setFilterMode(Qt.MatchFlag.MatchContains)
         self.species.completer().setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.species.clear();self.species.addItem('Choose species…',None)
-        for key,value in sorted(self.store.catalog.items(),key=lambda pair:pair[1]['scientific_name']):self.species.addItem(value['scientific_name'],key)
+        for key,value in sorted(self.store.catalog.items(),key=lambda pair:(pair[1]['scientific_name'], 0 if pair[0].endswith('__TP') else 1)):self.species.addItem(title(value),key)
         self.table.setRowCount(len(tracks));self.refresh_rows();self.table.blockSignals(False)
         self.gallery.load(self.store)
         if tracks:self.table.selectRow(0)
@@ -96,11 +92,6 @@ class TrainingPanel(QWidget):
 
     def autosave(self,*_):
         if self.loading or not self.store or self.current is None:return
-        applicable=self.outcome.currentData()=='species' and is_parrotfish(self.species.currentData(),self.store.catalog)
-        self.phase.setEnabled(applicable)
-        previous=self.store.label(self.current)
-        if previous.get('species_id')!=self.species.currentData():
-            self.phase.blockSignals(True);self.phase.setCurrentIndex(0);self.phase.blockSignals(False)
         self.remember()
         status=self.outcome.currentData()
         if status in ('species','unidentified','excluded') and self.reviewer.text().strip():
@@ -108,20 +99,20 @@ class TrainingPanel(QWidget):
             label=self.store.label(self.current)
             approved=sorted(s['sha256'] for s,c in zip(self.store.samples[self.current],self.checks) if c.isChecked())
             species=self.species.currentData() if status=='species' else None
-            if label and label.get('status')==status and label.get('species_id')==species and label.get('approved')==approved and label.get('note','')==self.note.text() and label.get('reviewer')==self.reviewer.text().strip() and label.get('phase')==(self.phase.currentData() if applicable else 'not_applicable'):return
+            if label and label.get('status')==status and label.get('species_id')==species and label.get('approved')==approved and label.get('note','')==self.note.text() and label.get('reviewer')==self.reviewer.text().strip():return
             self.save_track(silent=True)
 
     def refresh_rows(self):
         for n,track in enumerate(self.tracks):
-            ident=int(track['track_id']);label=self.store.label(ident);species=self.store.catalog.get(label.get('species_id'),{}).get('scientific_name','—')
-            for col,value in enumerate([f'{ident:04d}',f"{float(track['first_s']):.2f} s",track['detections'],species,('✓ '+label.get('status','pending')) if label else 'pending',PHASE_DISPLAY.get(label.get('phase'),'—')]):self.table.setItem(n,col,QTableWidgetItem(str(value)))
+            ident=int(track['track_id']);label=self.store.label(ident);species=title(self.store.catalog.get(label.get('species_id'),{}))
+            for col,value in enumerate([f'{ident:04d}',f"{float(track['first_s']):.2f} s",track['detections'],species,('✓ '+label.get('status','pending')) if label else 'pending']):self.table.setItem(n,col,QTableWidgetItem(str(value)))
         complete=sum(bool(self.store.label(i)) for i in self.store.tracks)
         self.summary.setText(f'{complete} / {len(self.tracks)} tracks reviewed · labels saved in this video’s result folder')
         self.export_button.setEnabled(self.store.complete and not self.drafts and not self.gallery.pending);self.filter(self.search.text())
 
     def filter(self,text):
         for row in range(self.table.rowCount()):
-            self.table.setRowHidden(row,not any(text.lower() in (self.table.item(row,col).text().lower() if self.table.item(row,col) else '') for col in range(6)))
+            self.table.setRowHidden(row,not any(text.lower() in (self.table.item(row,col).text().lower() if self.table.item(row,col) else '') for col in range(5)))
 
     def selection_changed(self):
         row=self.table.currentRow()
@@ -132,11 +123,11 @@ class TrainingPanel(QWidget):
             if i<len(samples):
                 sample=samples[i];pix=QPixmap(str(self.store.out/sample['path']));self.pictures[i].setPixmap(pix.scaled(340,220,Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation));self.captions[i].setText(f"{sample['width']} × {sample['height']} px · view {i+1}");self.checks[i].setEnabled(True);self.checks[i].setChecked(sample['sha256'] in label.get('approved',[]) if label else True)
             else:self.pictures[i].clear();self.pictures[i].setText('No additional image');self.captions[i].clear();self.checks[i].setChecked(False);self.checks[i].setEnabled(False)
-        self.outcome.setCurrentIndex(max(0,self.outcome.findData(label.get('status','pending'))));self.species.setCurrentIndex(max(0,self.species.findData(label.get('species_id'))));self.note.setText(label.get('note',''));self.phase.setCurrentIndex(max(0,self.phase.findData(label.get('phase','unassessed'))));self.phase.setEnabled(is_parrotfish(label.get('species_id'),self.store.catalog))
+        self.outcome.setCurrentIndex(max(0,self.outcome.findData(label.get('status','pending'))));self.species.setCurrentIndex(max(0,self.species.findData(label.get('species_id'))));self.note.setText(label.get('note',''))
         if not self.reviewer.text() and label:self.reviewer.setText(label['reviewer'])
         draft=self.drafts.get(ident)
         if draft:
-            self.outcome.setCurrentIndex(max(0,self.outcome.findData(draft['status'])));self.species.setCurrentText(draft['species']);self.note.setText(draft['note']);self.phase.setCurrentIndex(max(0,self.phase.findData(draft.get('phase','unassessed'))))
+            self.outcome.setCurrentIndex(max(0,self.outcome.findData(draft['status'])));self.species.setCurrentText(draft['species']);self.note.setText(draft['note'])
             for check,value in zip(self.checks,draft['checks']):check.setChecked(value)
         self.loading=False;self.save_button.setEnabled(True);self.outcome_changed();self.message.setText('Choose useful images. Changes save automatically once a species and reviewer are set.');self.selected.emit(row)
 
@@ -153,7 +144,7 @@ class TrainingPanel(QWidget):
             match=self.species.findText(self.species.currentText(),Qt.MatchFlag.MatchExactly)
             species_id=self.species.itemData(match) if match>=0 else None
         approved=[sample['sha256'] for sample,check in zip(self.store.samples[self.current],self.checks) if check.isChecked()]
-        try:self.store.save(self.current,self.outcome.currentData(),species_id,self.reviewer.text(),self.note.text(),approved,phase=self.phase.currentData() if is_parrotfish(species_id,self.store.catalog) and self.outcome.currentData()=='species' else None)
+        try:self.store.save(self.current,self.outcome.currentData(),species_id,self.reviewer.text(),self.note.text(),approved)
         except (OSError,ValueError) as exc:
             self.message.setText('Not saved: '+str(exc))
             if not silent:QMessageBox.warning(self,'Track not saved',str(exc))

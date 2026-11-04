@@ -10,7 +10,7 @@ from ui.theme import application_stylesheet
 from ui.settings_panels import ColorPanel,TrackingPanel
 from fish_settings import normalize_settings
 from ui.training_panel import TrainingPanel
-from fish_phase import PHASE_DISPLAY
+from species_labels import title as species_title
 from project_io import export_project, import_project, result_folder, source_video
 
 ROOT=Path(__file__).resolve().parent
@@ -193,7 +193,7 @@ class Window(QMainWindow):
         self.frame_label=QLabel('Frame —'); self.frame_label.setObjectName('pageSubtitle'); vl.addWidget(self.frame_label)
         right=QWidget(); rl=QVBoxLayout(right); rl.setContentsMargins(12,0,0,0); title=QLabel('Fish tracks'); title.setStyleSheet('font-size:17px;font-weight:650'); rl.addWidget(title)
         self.search=QLineEdit(); self.search.setPlaceholderText('Find ID…'); self.search.textChanged.connect(self.filter_tracks); rl.addWidget(self.search)
-        self.table=QTableWidget(0,6); self.table.setHorizontalHeaderLabels(['ID','First seen','Frames','Species','Review','Phase']); self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch); self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows); self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection); self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers); self.table.itemSelectionChanged.connect(self.track_selected); rl.addWidget(self.table,1)
+        self.table=QTableWidget(0,5); self.table.setHorizontalHeaderLabels(['ID','First seen','Frames','Species','Review']); self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch); self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows); self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection); self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers); self.table.itemSelectionChanged.connect(self.track_selected); rl.addWidget(self.table,1)
         self.crop=QLabel('Select a track'); self.crop.setAlignment(Qt.AlignmentFlag.AlignCenter); self.crop.setFixedHeight(160); self.crop.setObjectName('mediaPreview'); rl.addWidget(self.crop)
         self.track_detail=QLabel('Provisional sighting IDs\nSpecies unassigned'); self.track_detail.setWordWrap(True); self.track_detail.setObjectName('pageSubtitle'); rl.addWidget(self.track_detail)
         split.addWidget(left); split.addWidget(right); split.setSizes([900,300]); l.addWidget(split,1)
@@ -209,13 +209,12 @@ class Window(QMainWindow):
         if not self.training.store:return
         for row,track in enumerate(self.tracks):
             label=self.training.store.label(int(track['track_id']))
-            name=self.training.store.catalog.get(label.get('species_id'),{}).get('scientific_name','—')
+            name=species_title(self.training.store.catalog.get(label.get('species_id'),{}))
             self.table.setItem(row,3,QTableWidgetItem(name));self.table.setItem(row,4,QTableWidgetItem(('✓ '+label.get('status','pending')) if label else 'pending'))
-            self.table.setItem(row,5,QTableWidgetItem(PHASE_DISPLAY.get(label.get('phase'),'—')))
         row=self.table.currentRow()
         if 0<=row<len(self.tracks):
             track=self.tracks[row];label=self.training.store.label(int(track['track_id']))
-            species=self.training.store.catalog.get(label.get('species_id'),{}).get('scientific_name','Species unassigned')
+            species=species_title(self.training.store.catalog.get(label.get('species_id'),{'scientific_name':'Species unassigned'}))
             self.track_detail.setText(f"Fish {int(track['track_id']):04d} · {track['first_s']}–{track['last_s']} s\n{species} · {label.get('status','pending')}")
 
     def transfer_project(self,operation,importing):
@@ -283,7 +282,7 @@ class Window(QMainWindow):
         t=self.tracks[n]; self.player.pause(); self.player.setPosition(round(float(t['first_s'])*1000))
         pic=QPixmap(str(self.result/'crops'/f'fish_{int(t["track_id"]):04d}.jpg')); self.crop.setPixmap(pic.scaled(280,150,Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation))
         label=self.training.store.label(int(t['track_id'])) if self.training.store else {}
-        species=self.training.store.catalog.get(label.get('species_id'),{}).get('scientific_name','Species unassigned') if self.training.store else 'Species unassigned'
+        species=species_title(self.training.store.catalog.get(label.get('species_id'),{'scientific_name':'Species unassigned'})) if self.training.store else 'Species unassigned'
         review_line=species+' · '+label.get('status','pending')
         self.track_detail.setText(f'Fish {int(t["track_id"]):04d} · {t["first_s"]}–{t["last_s"]} s\n{t["detections"]} detected frames · peak score {t["best_confidence"]}\n{review_line}')
     def filter_tracks(self,text):
