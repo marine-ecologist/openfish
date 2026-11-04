@@ -87,9 +87,11 @@ class TrainingGallery(QWidget):
             for ident in members:
                 value=self.pending.get(ident,self.value(ident))
                 if value is None:raise ValueError('Assign a species or Unidentifiable to every fish in the group')
-                old=self.store.label(ident)
+                old=self.store.label(ident);draft=self.panel.drafts.get(ident,{})
+                approved=old.get('approved',[s['sha256'] for s in self.store.samples[ident]])
+                if 'checks' in draft:approved=[s['sha256'] for s,checked in zip(self.store.samples[ident],draft['checks']) if checked]
                 rows.append(dict(track_id=ident,status='unidentified' if value=='unidentified' else 'species',species_id=None if value=='unidentified' else value,
-                    reviewer=self.panel.reviewer.text().strip(),note=old.get('note',''),approved=old.get('approved',[s['sha256'] for s in self.store.samples[ident]])))
+                    reviewer=self.panel.reviewer.text().strip(),note=draft.get('note',old.get('note','')),approved=approved))
             self.store.save_group(rows)
             for ident in members:self.pending.pop(ident,None);self.panel.drafts.pop(ident,None)
             self.persist();self.panel.refresh_rows();self.panel.reload_current();self.panel.labels_changed.emit();self.refresh()
