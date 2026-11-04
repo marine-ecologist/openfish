@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.1 — 2026-11-04
+
+- Added embedded Gallery and Individual tabs at the top of Training; Gallery defaults to existing appearance groups.
+- Added human-selected group species propagation, per-fish Unidentifiable overrides, group Save buttons, atomic group saves and saved ticks.
+- Shared saved labels across Gallery, Individual and Viewer; gallery draft choices persist in the project until confirmed with Save group.
+- Added Previous/Next fish controls and immediate crop-selection autosave; all available crops start selected for newly labelled tracks, and zero selected crops are allowed.
+- Added native two-stage workflow regression checks and atomic group-save coverage.
+
+
 ## 0.7.0 — 2026-11-04
 
 - Added project export/import with bundled original video, result/ID folders, classifications, drafts, training snapshots and a pinned manual catalogue.

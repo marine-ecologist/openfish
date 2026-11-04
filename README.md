@@ -23,7 +23,7 @@ OpenFishID is an early research tool for macOS. Detections and tracks need human
 
 Visual similarity groups help with browsing; they do not identify species or confirm that sightings show the same individual. Phase 3 adds optional local species classification, confidence scores and per-track manual review. A trained Caribbean classifier is not bundled; without one, tracks remain unidentified. See the [species workflow](docs/species-identification.md) and [pretrained-model pilot](docs/fishial-trial.md).
 
-Current version: **0.7.0** · [Release history](CHANGELOG.md)
+Current version: **0.7.1** · [Release history](CHANGELOG.md)
 
 ## Acknowledgements
 

@@ -30,8 +30,16 @@ class TrainingTests(unittest.TestCase):
         with self.assertRaises(ValueError):self.store.export()
         (self.out/'tracks.csv').write_text('changed')
         with self.assertRaises(ValueError):TrainingStore(self.out,self.tracks)
+    def test_group_save_is_atomic(self):
+        key=next(iter(self.store.catalog))
+        rows=[dict(track_id=1,status='species',species_id=key,reviewer='R',note='',approved=[]),dict(track_id=999,status='species',species_id=key,reviewer='R',note='',approved=[])]
+        with self.assertRaises(ValueError):self.store.save_group(rows)
+        self.assertFalse(self.store.path.exists())
+        self.assertFalse(self.store.label(1))
+
     def test_species_requires_reviewer_and_approved_crop(self):
         key=next(iter(self.store.catalog))
-        with self.assertRaises(ValueError):self.store.save(1,'species',key,'R','',[])
+        self.store.save(1,'species',key,'R','',[])
+        self.assertEqual(self.store.label(1)['approved'],[])
         with self.assertRaises(ValueError):self.store.save(1,'unidentified',None,'','',[])
-        self.assertFalse(self.store.path.exists())
+        self.assertEqual(self.store.label(1)['status'],'species')

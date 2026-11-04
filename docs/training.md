@@ -4,7 +4,17 @@ Open a completed run, then choose **Training** below Viewer. Both pages show the
 
 Enter a reviewer name, choose **Species confirmed** and a catalogue species, approve useful images, and click **Save track**. Alternatively choose **Unidentified** or **Exclude from training**. The starting manual catalogue is the explicit CoReFish Caribbean species crosswalk; any run prediction catalogue is also available. Model suggestions are not automatically confirmed. If the desired species is absent, leave the track unidentified until the catalogue is curated.
 
-Label edits and checkbox choices survive row changes and Viewer/Training navigation. Drafts are also saved on navigation and close, in `training_drafts.json`; only **Save track** completes a review and adds its event to `training_labels.json`. Reopening restores saved labels and drafts. Files are bound to the track CSV and run metadata fingerprint; changed runs are rejected rather than silently relabelled. Draft writes can report disk errors; unsaved edits should be saved before closing if an error occurs.
+Label edits and checkbox choices survive row changes and Viewer/Training navigation. Drafts are also saved on navigation and close, in `training_drafts.json`; Gallery **Save group** completes group reviews; valid Individual edits autosave into `training_labels.json`. Reopening restores saved labels and drafts. Files are bound to the track CSV and run metadata fingerprint; changed runs are rejected rather than silently relabelled. Draft writes can report disk errors; unsaved edits should be saved before closing if an error occurs.
+
+## Two-stage workflow (0.7.1)
+
+Training opens on **Gallery**, grouped by the existing `similarity.json` appearance groups. Missing group memberships appear as individual sections. No new model inference or automatic taxonomic assignment occurs.
+
+Choose a species using a group or fish dropdown. A species choice propagates to the group's fish as a staged human edit. Set any individual exception to **Unidentifiable**. Enter a reviewer and click **Save group** to commit the group atomically. Ticks identify saved fish and fully saved groups. Choices before Save group are continuously persisted in `training_gallery_drafts.json`; pending group edits block training export. Saving labels updates Individual and Viewer immediately.
+
+Then choose **Individual**, or **Select training images** on a gallery card. Use Previous/Next fish or the shared track table. New labelled tracks start with all available images selected; uncheck unsuitable crops. For labelled tracks, checkbox changes save immediately to `training_labels.json`. Selecting zero images is allowed: the label remains, but the track contributes no training images. Existing crop exclusions are preserved when changing species in Gallery. Individual outcome/species edits also autosave once a valid species/outcome and reviewer are supplied; incomplete edits remain recoverable drafts. Note/reviewer edits use a short autosave delay.
+
+Appearance groups are browsing aids, not taxonomic evidence. Group Save is an explicit human confirmation; inspect the members before committing a shared species.
 
 ## Images
 
@@ -12,7 +22,7 @@ The grid uses up to four available original-color cached crops: temporal samples
 
 ## Export data
 
-**Export data** unlocks when every track has a saved review outcome. Unidentified and excluded outcomes count as reviewed, without forcing a species guess. Edits still in draft must be saved first. Confirmed species tracks require at least one approved image.
+**Export data** unlocks when every track has a saved review outcome. Unidentified and excluded outcomes count as reviewed, without forcing a species guess. Edits still in draft must be saved first. Confirmed species tracks with no approved images contribute no training images.
 
 Exports are stored within the run:
 

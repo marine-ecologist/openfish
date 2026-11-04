@@ -65,15 +65,26 @@ class TrainingStore:
         if status == 'species' and species_id not in self.catalog: raise ValueError('Choose a species')
         available = {s['sha256']: s for s in self.samples[ident]}
         if set(approved)-set(available): raise ValueError('Unknown crop')
-        if status == 'species' and not approved: raise ValueError('Approve at least one image, or exclude this track')
         row = dict(track_id=ident, status=status, species_id=species_id if status=='species' else None,
                    reviewer=reviewer.strip(), note=note, approved=sorted(set(approved)),
                    reviewed_at=datetime.now(timezone.utc).isoformat())
-        # Save first; a failed disk write must not change the in-memory review.
-        updated = json.loads(json.dumps(self.data))
-        updated['labels'][str(ident)] = row; updated['history'].append(row)
-        atomic_json(self.out/'training_catalog.json', self.catalog)
-        atomic_json(self.path, updated); self.data = updated
+        self.save_group([row])
+
+    def save_group(self, rows):
+        """Validate and commit an explicitly reviewed group in one label-file write."""
+        if dataset_identity(self.out)!=self.fingerprint:raise ValueError('Run changed; reopen before saving')
+        updated=json.loads(json.dumps(self.data))
+        for source in rows:
+            row=dict(source)
+            ident=row['track_id'];status=row['status']
+            if ident not in self.tracks or status not in ('species','unidentified','excluded'):raise ValueError('Invalid review')
+            if not row['reviewer'].strip():raise ValueError('Enter a reviewer name')
+            if status=='species' and row['species_id'] not in self.catalog:raise ValueError('Choose a species')
+            if set(row['approved'])-{s['sha256'] for s in self.samples[ident]}:raise ValueError('Unknown crop')
+            row['reviewed_at']=datetime.now(timezone.utc).isoformat()
+            updated['labels'][str(ident)]=row;updated['history'].append(row)
+        atomic_json(self.out/'training_catalog.json',self.catalog)
+        atomic_json(self.path,updated);self.data=updated
 
     @property
     def complete(self): return bool(self.tracks) and all(self.label(i).get('status') in ('species','unidentified','excluded') for i in self.tracks)
