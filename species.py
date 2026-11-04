@@ -69,7 +69,13 @@ def build_species(out, tracks, classifier=None, threshold=.8, margin=.2):
     folder = os.environ.get('OPENFISHID_SPECIES_MODEL')
     if classifier is None and folder:
         try:
-            classifier = LocalClassifier(folder)
+            manifest_path = Path(folder) / 'species_manifest.json'
+            manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+            if manifest.get('backend') == 'fishial_torchscript':
+                from fishial_species import FishialClassifier
+                classifier = FishialClassifier(folder)
+            else:
+                classifier = LocalClassifier(folder)
         except Exception as exc:
             setup_error = f'{type(exc).__name__}: {exc}'
     if classifier is not None:

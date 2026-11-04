@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.1 — 2026-11-04
+
+- Added the offline Fishial v0.10.2 TorchScript adapter, using embedded model labels and native ArcFace softmax scores; natural-centroid cosine scores remain a separate diagnostic.
+- Added reproducible bounded CoReFish sampling, selective ZIP downloads with CRC validation, crop/track benchmarking, per-species metrics and confusion exports.
+- Ran a 61-track / 183-crop pilot across 33 species. Multi-view top-1 was 6/45 on covered species, and all 18 accepted softmax assignments were wrong. This model remains experimental and requires manual verification.
+- Checked adapter parity against the bundle’s own inference code on six crops.
+- Added visible top-three suggestions, additional track views, clearer review controls and a 36-track local-footage review set. Local accuracy awaits human labels.
+- Added metric regression tests and documented model/data provenance, licence limits and reproduction steps.
+
+
 ## 0.5.0 — 2026-11-04
 
 - Added a modular offline image-classification adapter with explicit catalogue/logit mapping and model file hashes; no classifier weights or performance claims are bundled.

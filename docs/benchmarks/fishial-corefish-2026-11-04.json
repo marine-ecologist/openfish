@@ -1,0 +1,178 @@
+{
+  "adapter_verification": {
+    "checks": [
+      {
+        "crop": "benchmark_crops/track_4692_view_0.jpg",
+        "max_softmax_difference": 4.347384674474597e-10,
+        "stored_score_difference": 0.0,
+        "top3_match": true
+      },
+      {
+        "crop": "benchmark_crops/track_4692_view_1.jpg",
+        "max_softmax_difference": 1.3271346688270569e-08,
+        "stored_score_difference": 0.0,
+        "top3_match": true
+      },
+      {
+        "crop": "benchmark_crops/track_5023_view_2.jpg",
+        "max_softmax_difference": 2.205371856689453e-06,
+        "stored_score_difference": 0.0,
+        "top3_match": true
+      },
+      {
+        "crop": "benchmark_crops/track_4809_view_2.jpg",
+        "max_softmax_difference": 9.166001291305292e-13,
+        "stored_score_difference": 0.0,
+        "top3_match": true
+      },
+      {
+        "crop": "benchmark_crops/track_4121_view_1.jpg",
+        "max_softmax_difference": 1.3571366253017914e-12,
+        "stored_score_difference": 0.0,
+        "top3_match": true
+      },
+      {
+        "crop": "benchmark_crops/track_4981_view_2.jpg",
+        "max_softmax_difference": 1.2516975402832031e-06,
+        "stored_score_difference": 0.0,
+        "top3_match": true
+      }
+    ],
+    "note": "Vendor box-only inference, same CPU model and native ArcFace softmax; no segmentation or TTA.",
+    "opencv": "5.0.0",
+    "source": "inference.py from official v0.10.2 ZIP",
+    "status": "passed"
+  },
+  "artifact_hashes": {
+    "corefish/corefish_dataset/coco_species.json": "c52b851a3731fe3376cd171afa061b61a59e86fb7b89e2e936816866596be1c6",
+    "crosswalk.json": "cb43274ff154e89bcbc28c730631f29bc1dd7c3a2de67d4b382d425226d879e0",
+    "fishial-model/inference.py": "9033244bf768a0c6b79fb8f44df315aea1f7f696d24a0c4b966ecfa3357f9cbd",
+    "fishial-model/model.pt": "926fa91b8d1fb3b370b6a54f6c8bf6b846152f472a5150ae7ae59d4f3f1dcbcc",
+    "fishial-v0.10.2.zip": "a31d78a7021d7b8a94c87b816b6a7b49ba1b1ef0b7284942b8e3d522322ae078",
+    "fishial_source_revision": "f43074efba44a7c833457d0ecf2b96a403e8283d",
+    "sample_manifest.json": "968911b5f8fc1366fa684af902a755f9db39099cc29b4bb0ded5768823eb6f9d"
+  },
+  "dataset_summary": {
+    "absent_species": 9,
+    "absent_tracks": 16,
+    "covered_species": 24,
+    "covered_tracks": 45,
+    "crops": 183,
+    "seed": 20261104,
+    "species": 33,
+    "tracks": 61
+  },
+  "methods": {
+    "cosine": {
+      "crop": {
+        "absent_false_acceptances": 0,
+        "absent_n": 48,
+        "absent_rejection_rate": 1.0,
+        "acceptance_rate": 0.00546448087431694,
+        "accepted_n": 1,
+        "accepted_precision": 1.0,
+        "confidently_wrong": 0,
+        "covered_n": 135,
+        "n": 183,
+        "top1_covered": 0.1037037037037037,
+        "top3_covered": 0.1259259259259259,
+        "unidentified_rate": 0.994535519125683
+      },
+      "margin": 0.05,
+      "multi_view_track": {
+        "absent_false_acceptances": 0,
+        "absent_n": 16,
+        "absent_rejection_rate": 1.0,
+        "acceptance_rate": 0.0,
+        "accepted_n": 0,
+        "accepted_precision": null,
+        "confidently_wrong": 0,
+        "covered_n": 45,
+        "n": 61,
+        "top1_covered": 0.13333333333333333,
+        "top3_covered": 0.17777777777777778,
+        "unidentified_rate": 1.0
+      },
+      "single_view_track": {
+        "absent_false_acceptances": 0,
+        "absent_n": 16,
+        "absent_rejection_rate": 1.0,
+        "acceptance_rate": 0.0,
+        "accepted_n": 0,
+        "accepted_precision": null,
+        "confidently_wrong": 0,
+        "covered_n": 45,
+        "n": 61,
+        "top1_covered": 0.0,
+        "top3_covered": 0.0,
+        "unidentified_rate": 1.0
+      },
+      "threshold": 0.7
+    },
+    "softmax": {
+      "crop": {
+        "absent_false_acceptances": 33,
+        "absent_n": 48,
+        "absent_rejection_rate": 0.3125,
+        "acceptance_rate": 0.7868852459016393,
+        "accepted_n": 144,
+        "accepted_precision": 0.1111111111111111,
+        "confidently_wrong": 128,
+        "covered_n": 135,
+        "n": 183,
+        "top1_covered": 0.11851851851851852,
+        "top3_covered": 0.14814814814814814,
+        "unidentified_rate": 0.21311475409836064
+      },
+      "margin": 0.2,
+      "multi_view_track": {
+        "absent_false_acceptances": 4,
+        "absent_n": 16,
+        "absent_rejection_rate": 0.75,
+        "acceptance_rate": 0.29508196721311475,
+        "accepted_n": 18,
+        "accepted_precision": 0.0,
+        "confidently_wrong": 18,
+        "covered_n": 45,
+        "n": 61,
+        "top1_covered": 0.13333333333333333,
+        "top3_covered": 0.28888888888888886,
+        "unidentified_rate": 0.7049180327868853
+      },
+      "single_view_track": {
+        "absent_false_acceptances": 13,
+        "absent_n": 16,
+        "absent_rejection_rate": 0.1875,
+        "acceptance_rate": 0.8032786885245902,
+        "accepted_n": 49,
+        "accepted_precision": 0.0,
+        "confidently_wrong": 49,
+        "covered_n": 45,
+        "n": 61,
+        "top1_covered": 0.0,
+        "top3_covered": 0.022222222222222223,
+        "unidentified_rate": 0.19672131147540983
+      },
+      "threshold": 0.8
+    }
+  },
+  "provenance": {
+    "annotation_sha256": "c52b851a3731fe3376cd171afa061b61a59e86fb7b89e2e936816866596be1c6",
+    "model": {
+      "backend": "fishial_torchscript",
+      "input_size": [
+        154,
+        434
+      ],
+      "model_id": "fishial-v0.10.2",
+      "revision": "926fa91b8d1fb3b370b6a54f6c8bf6b846152f472a5150ae7ae59d4f3f1dcbcc",
+      "score_method": "softmax_arcface_logits",
+      "source": "https://storage.googleapis.com/fishial-ml-resources/classification_model_v0.10.2.zip"
+    },
+    "note": "Exploratory external-dataset pilot; training overlap unknown. No fine tuning or threshold fitting. Broad labels excluded; no species inference from appearance groups.",
+    "opencv": "5.0.0",
+    "python": "3.15.2",
+    "sample_manifest_sha256": "968911b5f8fc1366fa684af902a755f9db39099cc29b4bb0ded5768823eb6f9d",
+    "torch": "2.15.0"
+  }
+}
