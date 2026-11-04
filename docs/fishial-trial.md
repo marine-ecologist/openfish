@@ -112,3 +112,17 @@ The renderer expects the local review folder to exist. Optional vendor parity ch
 python -m pip install --target outputs/species_trial/verification_deps albumentations==2.0.8
 python experiments/verify_fishial_adapter.py outputs/species_trial
 ```
+
+## Caribbean candidate filter
+
+The benchmark gallery now defaults to a regional candidate view, with an unrestricted comparison link. The allowlist is the full explicit CoReFish species crosswalk, including species absent from this pilot; 49 labels match the model. It excludes Pacific-only suggestions such as Sebastes melanops, but is not an exhaustive Caribbean checklist. This is a post-hoc regional prior, not a retrained classifier or independent validation. No ground-truth tracks are removed, and no per-image reference labels select candidate classes.
+
+Filtering masks candidate scores without renormalizing softmax probabilities. Original thresholds remain unchanged. This preserves low confidence when the unrestricted model assigned most probability to an excluded species. Mean softmax top-1 improves from 6/45 to 15/45 (33.3%), and top-3 from 13/45 to 21/45 (46.7%), among covered tracks. No regional assignments pass the existing score rules. Cosine top-1 is 11/45 (24.4%), also with no accepted tracks. Local-footage review predictions are unchanged.
+
+```sh
+python experiments/filter_caribbean.py outputs/species_trial
+python experiments/render_trial_report.py outputs/species_trial --unrestricted
+python experiments/render_trial_report.py outputs/species_trial
+```
+
+Regional scores, unchanged denominators, thresholds and allowlist provenance are saved in `caribbean_benchmark_results.json`; original benchmark files are preserved.

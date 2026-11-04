@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added a default Caribbean-candidate benchmark view using the full explicit CoReFish species catalogue, with an unrestricted comparison. Original probability mass and score gates are preserved; regional results and allowlist provenance are exported separately.
+
 ## 0.5.1 — 2026-11-04
 
 - Added the offline Fishial v0.10.2 TorchScript adapter, using embedded model labels and native ArcFace softmax scores; natural-centroid cosine scores remain a separate diagnostic.
