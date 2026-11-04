@@ -1,0 +1,212 @@
+{
+  "abudefduf_saxatilis": {
+    "scientific_name": "Abudefduf saxatilis"
+  },
+  "acanthostracion_polygonium": {
+    "scientific_name": "Acanthostracion polygonium"
+  },
+  "acanthostracion_quadricornis": {
+    "scientific_name": "Acanthostracion quadricornis"
+  },
+  "acanthurus_chirurgus": {
+    "scientific_name": "Acanthurus chirurgus"
+  },
+  "acanthurus_coeruleus": {
+    "scientific_name": "Acanthurus coeruleus"
+  },
+  "acanthurus_tractus": {
+    "scientific_name": "Acanthurus tractus"
+  },
+  "aluterus_scriptus": {
+    "scientific_name": "Aluterus scriptus"
+  },
+  "anisotremus_virginicus": {
+    "scientific_name": "Anisotremus virginicus"
+  },
+  "azurina_cyanea": {
+    "scientific_name": "Azurina cyanea"
+  },
+  "azurina_multilineata": {
+    "scientific_name": "Azurina multilineata"
+  },
+  "bodianus_rufus": {
+    "scientific_name": "Bodianus rufus"
+  },
+  "brachygenys_chrysargyrea": {
+    "scientific_name": "Brachygenys chrysargyrea"
+  },
+  "cantherhines_macrocerus": {
+    "scientific_name": "Cantherhines macrocerus"
+  },
+  "cantherhines_pullus": {
+    "scientific_name": "Cantherhines pullus"
+  },
+  "canthigaster_rostrata": {
+    "scientific_name": "Canthigaster rostrata"
+  },
+  "caranx_bartholomaei": {
+    "scientific_name": "Caranx bartholomaei"
+  },
+  "caranx_latus": {
+    "scientific_name": "Caranx latus"
+  },
+  "caranx_ruber": {
+    "scientific_name": "Caranx ruber"
+  },
+  "cephalopholis_cruentata": {
+    "scientific_name": "Cephalopholis cruentata"
+  },
+  "cephalopholis_fulva": {
+    "scientific_name": "Cephalopholis fulva"
+  },
+  "chaetodon_capistratus": {
+    "scientific_name": "Chaetodon capistratus"
+  },
+  "chaetodon_ocellatus": {
+    "scientific_name": "Chaetodon ocellatus"
+  },
+  "chaetodon_striatus": {
+    "scientific_name": "Chaetodon striatus"
+  },
+  "clepticus_parrae": {
+    "scientific_name": "Clepticus parrae"
+  },
+  "diodon_hystrix": {
+    "scientific_name": "Diodon hystrix"
+  },
+  "epinephelus_adscensionis": {
+    "scientific_name": "Epinephelus adscensionis"
+  },
+  "epinephelus_guttatus": {
+    "scientific_name": "Epinephelus guttatus"
+  },
+  "epinephelus_striatus": {
+    "scientific_name": "Epinephelus striatus"
+  },
+  "eques_punctatus": {
+    "scientific_name": "Eques punctatus"
+  },
+  "ginglymostoma_cirratum": {
+    "scientific_name": "Ginglymostoma cirratum"
+  },
+  "gramma_loreto": {
+    "scientific_name": "Gramma loreto"
+  },
+  "haemulon_flavolineatum": {
+    "scientific_name": "Haemulon flavolineatum"
+  },
+  "haemulon_sciurus": {
+    "scientific_name": "Haemulon sciurus"
+  },
+  "halichoeres_garnoti": {
+    "scientific_name": "Halichoeres garnoti"
+  },
+  "halichoeres_radiatus": {
+    "scientific_name": "Halichoeres radiatus"
+  },
+  "holacanthus_ciliaris": {
+    "scientific_name": "Holacanthus ciliaris"
+  },
+  "holacanthus_tricolor": {
+    "scientific_name": "Holacanthus tricolor"
+  },
+  "hypanus_americanus": {
+    "scientific_name": "Hypanus americanus"
+  },
+  "hypoplectrus_nigricans": {
+    "scientific_name": "Hypoplectrus nigricans"
+  },
+  "hypoplectrus_puella": {
+    "scientific_name": "Hypoplectrus puella"
+  },
+  "lachnolaimus_maximus": {
+    "scientific_name": "Lachnolaimus maximus"
+  },
+  "lactophrys_bicaudalis": {
+    "scientific_name": "Lactophrys bicaudalis"
+  },
+  "lactophrys_triqueter": {
+    "scientific_name": "Lactophrys triqueter"
+  },
+  "lutjanus_apodus": {
+    "scientific_name": "Lutjanus apodus"
+  },
+  "lutjanus_griseus": {
+    "scientific_name": "Lutjanus griseus"
+  },
+  "microspathodon_chrysurus": {
+    "scientific_name": "Microspathodon chrysurus"
+  },
+  "mulloidichthys_martinicus": {
+    "scientific_name": "Mulloidichthys martinicus"
+  },
+  "myripristis_jacobus": {
+    "scientific_name": "Myripristis jacobus"
+  },
+  "ocyurus_chrysurus": {
+    "scientific_name": "Ocyurus chrysurus"
+  },
+  "opistognathus_aurifrons": {
+    "scientific_name": "Opistognathus aurifrons"
+  },
+  "pomacanthus_arcuatus": {
+    "scientific_name": "Pomacanthus arcuatus"
+  },
+  "pomacanthus_paru": {
+    "scientific_name": "Pomacanthus paru"
+  },
+  "pseudupeneus_maculatus": {
+    "scientific_name": "Pseudupeneus maculatus"
+  },
+  "remora_remora": {
+    "scientific_name": "Remora remora"
+  },
+  "scarus_iseri": {
+    "scientific_name": "Scarus iseri"
+  },
+  "scarus_taeniopterus": {
+    "scientific_name": "Scarus taeniopterus"
+  },
+  "scarus_vetula": {
+    "scientific_name": "Scarus vetula"
+  },
+  "scorpaena_plumieri": {
+    "scientific_name": "Scorpaena plumieri"
+  },
+  "sparisoma_aurofrenatum": {
+    "scientific_name": "Sparisoma aurofrenatum"
+  },
+  "sparisoma_rubripinne": {
+    "scientific_name": "Sparisoma rubripinne"
+  },
+  "sparisoma_viride": {
+    "scientific_name": "Sparisoma viride"
+  },
+  "sphoeroides_testudineus": {
+    "scientific_name": "Sphoeroides testudineus"
+  },
+  "sphyraena_barracuda": {
+    "scientific_name": "Sphyraena barracuda"
+  },
+  "stegastes_adustus": {
+    "scientific_name": "Stegastes adustus"
+  },
+  "stegastes_diencaeus": {
+    "scientific_name": "Stegastes diencaeus"
+  },
+  "stegastes_leucostictus": {
+    "scientific_name": "Stegastes leucostictus"
+  },
+  "stegastes_partitus": {
+    "scientific_name": "Stegastes partitus"
+  },
+  "stegastes_planifrons": {
+    "scientific_name": "Stegastes planifrons"
+  },
+  "stegastes_xanthurus": {
+    "scientific_name": "Stegastes xanthurus"
+  },
+  "thalassoma_bifasciatum": {
+    "scientific_name": "Thalassoma bifasciatum"
+  }
+}

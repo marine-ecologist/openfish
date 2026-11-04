@@ -9,6 +9,7 @@ from PySide6.QtMultimedia import QMediaPlayer,QAudioOutput,QVideoSink
 from ui.theme import application_stylesheet
 from ui.settings_panels import ColorPanel,TrackingPanel
 from fish_settings import normalize_settings
+from ui.training_panel import TrainingPanel
 
 ROOT=Path(__file__).resolve().parent
 class VideoCanvas(QWidget):
@@ -26,7 +27,7 @@ class VideoCanvas(QWidget):
 
 class Window(QMainWindow):
     def __init__(self,result=None):
-        super().__init__(); self.setWindowTitle('OpenFishID 0.5.1 · Reef fish video'); self.resize(1480,920); self.setMinimumSize(1100,720)
+        super().__init__(); self.setWindowTitle('OpenFishID 0.6.0 · Reef fish video'); self.resize(1480,920); self.setMinimumSize(1100,720)
         self.source=None; self.result=None; self.tracks=[]; self.frames={}; self.run={}; self.pending=''; self.busy=False; self.phase=''; self.user_scrubbing=False
         self.process=QProcess(self); self.process.setWorkingDirectory(str(ROOT)); self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.process.readyReadStandardOutput.connect(self.read_output); self.process.finished.connect(self.finished); self.process.errorOccurred.connect(self.process_error)
@@ -42,13 +43,13 @@ class Window(QMainWindow):
         names=QVBoxLayout(); names.setSpacing(1); title=QLabel('OpenFishID'); title.setObjectName('appTitle'); names.addWidget(title)
         caption=QLabel('REEF FISH VIDEO'); caption.setObjectName('appCaption'); names.addWidget(caption); brand.addLayout(names); sb.addLayout(brand); sb.addSpacing(25)
         section=QLabel('WORKSPACE'); section.setObjectName('sidebarSection'); sb.addWidget(section)
-        for i,name in enumerate(['Projects','Video','Process','Viewer']):
+        for i,name in enumerate(['Projects','Video','Process','Viewer','Training']):
             b=QPushButton(name); b.setObjectName('sidebarNav'); b.setCheckable(True); b.clicked.connect(lambda checked=False,n=i:self.navigate(n)); self.nav.append(b); sb.addWidget(b)
-            b.setToolTip({'Projects':'Reopen completed fish surveys and their exported results.','Video':'Select footage, adjust color correction, and inspect full-width original/corrected stills. Video preferences are remembered between sessions.','Process':'Choose YOLO or RF-DETR and tune detection and tracking. Hover each setting label for its purpose and the effect of raising or lowering it.','Viewer':'Play annotated results, step through frames, and select a fish ID to inspect its crop and first sighting.'}[name]);b.setToolTip('<qt>'+b.toolTip()+'</qt>');b.setToolTipDuration(20000)
+            b.setToolTip({'Projects':'Reopen completed fish surveys and their exported results.','Video':'Select footage, adjust color correction, and inspect full-width original/corrected stills. Video preferences are remembered between sessions.','Process':'Choose YOLO or RF-DETR and tune detection and tracking. Hover each setting label for its purpose and the effect of raising or lowering it.','Training':'Review up to four images per track, save species labels and export reviewed training data.','Viewer':'Play annotated results, step through frames, and select a fish ID to inspect its crop and first sighting.'}[name]);b.setToolTip('<qt>'+b.toolTip()+'</qt>');b.setToolTipDuration(20000)
         sb.addStretch(); hint=QLabel('Local processing\nVideos stay on this Mac'); hint.setWordWrap(True); hint.setStyleSheet('color:#77797d;font-size:12px;'); sb.addWidget(hint)
-        version=QLabel('OpenFishID v0.5.1'); version.setObjectName('sidebarVersion'); sb.addWidget(version)
+        version=QLabel('OpenFishID v0.6.0'); version.setObjectName('sidebarVersion'); sb.addWidget(version)
         sl.addWidget(sidebar); sl.addWidget(self.stack,1); self.setCentralWidget(shell)
-        self.build_projects(); self.build_video(); self.build_process(); self.build_viewer()
+        self.build_projects(); self.build_video(); self.build_process(); self.build_viewer(); self.build_training()
         self.setStyleSheet(application_stylesheet(True)+'''QTableWidget,QListWidget{background:#1b1d1f;border:1px solid #303337;border-radius:8px;gridline-color:#303337;color:#f2f2f7;} QListWidget::item{padding:16px;} QHeaderView::section{background:#222528;color:#a8a8ad;border:0;padding:8px;} QTableWidget::item:selected,QListWidget::item:selected{background:#303337;color:white;} QVideoWidget{background:#0b0d0e;} QPushButton#primaryButton:disabled{background:#303337;border-color:#393d42;color:#77797d;}''')
         self.navigate(0); self.refresh_projects(); self.statusBar().showMessage('Ready — select a video or open a completed result')
         self.refresh_timer=QTimer(self); self.refresh_timer.timeout.connect(self.refresh_projects); self.refresh_timer.start(5000)
@@ -71,6 +72,8 @@ class Window(QMainWindow):
         if primary:b.setObjectName('primaryButton')
         return b
     def navigate(self,n):
+        if hasattr(self,'training'):self.training.remember()
+        if n==4 and hasattr(self,'player'):self.player.pause()
         self.stack.setCurrentIndex(n)
         for i,b in enumerate(self.nav): b.setChecked(i==n)
     def build_projects(self):
@@ -179,12 +182,25 @@ class Window(QMainWindow):
         self.frame_label=QLabel('Frame —'); self.frame_label.setObjectName('pageSubtitle'); vl.addWidget(self.frame_label)
         right=QWidget(); rl=QVBoxLayout(right); rl.setContentsMargins(12,0,0,0); title=QLabel('Fish tracks'); title.setStyleSheet('font-size:17px;font-weight:650'); rl.addWidget(title)
         self.search=QLineEdit(); self.search.setPlaceholderText('Find ID…'); self.search.textChanged.connect(self.filter_tracks); rl.addWidget(self.search)
-        self.table=QTableWidget(0,3); self.table.setHorizontalHeaderLabels(['ID','First seen','Frames']); self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch); self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows); self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection); self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers); self.table.itemSelectionChanged.connect(self.track_selected); rl.addWidget(self.table,1)
+        self.table=QTableWidget(0,5); self.table.setHorizontalHeaderLabels(['ID','First seen','Frames','Species','Review']); self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch); self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows); self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection); self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers); self.table.itemSelectionChanged.connect(self.track_selected); rl.addWidget(self.table,1)
         self.crop=QLabel('Select a track'); self.crop.setAlignment(Qt.AlignmentFlag.AlignCenter); self.crop.setFixedHeight(160); self.crop.setObjectName('mediaPreview'); rl.addWidget(self.crop)
         self.track_detail=QLabel('Provisional sighting IDs\nSpecies unassigned'); self.track_detail.setWordWrap(True); self.track_detail.setObjectName('pageSubtitle'); rl.addWidget(self.track_detail)
         split.addWidget(left); split.addWidget(right); split.setSizes([900,300]); l.addWidget(split,1)
         row=QHBoxLayout(); row.addWidget(self.button('Open result folder',self.reveal_result)); row.addWidget(self.button('Track CSV',lambda:self.open_artifact('tracks.csv'))); row.addWidget(self.button('Fish gallery',lambda:self.open_artifact('fish_ID_gallery.html'))); row.addStretch(); l.addLayout(row)
         note=QLabel('Review pass · fish can receive new IDs after occlusion or re-entry. Small fish may be missed. Track totals are not unique-fish counts.'); note.setWordWrap(True); note.setObjectName('pageSubtitle'); l.addWidget(note)
+    def build_training(self):
+        layout=self.page('Training','Review fish tracks, confirm species and build a training dataset from approved original-color images.')
+        self.training=TrainingPanel();layout.addWidget(self.training)
+        self.training.selected.connect(lambda row:self.table.selectRow(row) if self.table.currentRow()!=row else None)
+        self.training.labels_changed.connect(self.refresh_species_columns)
+
+    def refresh_species_columns(self):
+        if not self.training.store:return
+        for row,track in enumerate(self.tracks):
+            label=self.training.store.label(int(track['track_id']))
+            name=self.training.store.catalog.get(label.get('species_id'),{}).get('scientific_name','—')
+            self.table.setItem(row,3,QTableWidgetItem(name));self.table.setItem(row,4,QTableWidgetItem(label.get('status','pending')))
+
     def open_result(self):
         path=QFileDialog.getExistingDirectory(self,'Open completed OpenFishID result',str(ROOT/'outputs'))
         if path:self.load_result(Path(path))
@@ -204,6 +220,7 @@ class Window(QMainWindow):
         for n,t in enumerate(tracks):
             self.table.insertRow(n)
             for col,value in enumerate([f'{int(t["track_id"]):04d}',self.time_text(float(t['first_s'])*1000),t['detections']]):self.table.setItem(n,col,QTableWidgetItem(value))
+        self.training.load(path,tracks);self.refresh_species_columns()
         self.result_label.setText(f'{Path(meta["source"]).name} · {meta["processed_frames"]:,} frames · {len(tracks)} provisional tracks')
         self.video.image=QImage(str(path/'review_00000.jpg')); self.video.frames_received=0; self.video.update()
         self.player.setSource(QUrl.fromLocalFile(str(path/'fishcount_tracked.mp4'))); self.open_viewer.setEnabled(True); self.navigate(3); self.statusBar().showMessage('Playback ready — '+Path(meta['source']).name)
@@ -211,6 +228,7 @@ class Window(QMainWindow):
     def track_selected(self):
         n=self.table.currentRow()
         if n<0 or n>=len(self.tracks):return
+        self.training.select_row(n)
         t=self.tracks[n]; self.player.pause(); self.player.setPosition(round(float(t['first_s'])*1000))
         pic=QPixmap(str(self.result/'crops'/f'fish_{int(t["track_id"]):04d}.jpg')); self.crop.setPixmap(pic.scaled(280,150,Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation))
         self.track_detail.setText(f'Fish {int(t["track_id"]):04d} · {t["first_s"]}–{t["last_s"]} s\n{t["detections"]} detected frames · peak score {t["best_confidence"]}\nUnreviewed · species unassigned')
@@ -237,7 +255,7 @@ class Window(QMainWindow):
     def closeEvent(self,event):
         if self.busy:
             QMessageBox.information(self,'Processing is running','Keep this window open until processing finishes, or cancel the run from Process.'); event.ignore()
-        else:self.color_panel.shutdown();self.player.stop(); event.accept()
+        else:self.training.remember();self.color_panel.shutdown();self.player.stop(); event.accept()
 
 def main():
     p=argparse.ArgumentParser(); p.add_argument('--result'); p.add_argument('--screenshot'); a=p.parse_args()

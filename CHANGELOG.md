@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.6.0 — 2026-11-04
+
+- Added Training below Viewer, with synchronized Fish Tracks tables, a 2×2 original-color image grid, species labels, explicit unidentified/excluded outcomes, crop approval, reviewer and notes.
+- Saved labels and resumable drafts per run; Viewer/Training navigation preserves selected tracks and label edits.
+- Added gated, versioned training exports containing approved images, samples.csv, tracks.csv and a provenance manifest. Unknown/excluded tracks remain audit records, not species training examples.
+- Added persistence, export-integrity and desktop UI checks; crop selection ranks available cached views by size and edge detail and does not infer identity from clusters.
+
+### Also included
 
 - Added a default Caribbean-candidate benchmark view using the full explicit CoReFish species catalogue, with an unrestricted comparison. Original probability mass and score gates are preserved; regional results and allowlist provenance are exported separately.
 
