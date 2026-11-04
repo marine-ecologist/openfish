@@ -2,6 +2,8 @@
 
 ## 0.6.0 — 2026-11-04
 
+- Replaced the sidebar logo and macOS app icon with a transparent, left-facing teal fish clipart mark; retained SVG and PNG assets.
+
 - Added Training below Viewer, with synchronized Fish Tracks tables, a 2×2 original-color image grid, species labels, explicit unidentified/excluded outcomes, crop approval, reviewer and notes.
 - Saved labels and resumable drafts per run; Viewer/Training navigation preserves selected tracks and label edits.
 - Added gated, versioned training exports containing approved images, samples.csv, tracks.csv and a provenance manifest. Unknown/excluded tracks remain audit records, not species training examples.

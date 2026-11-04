@@ -200,6 +200,11 @@ class Window(QMainWindow):
             label=self.training.store.label(int(track['track_id']))
             name=self.training.store.catalog.get(label.get('species_id'),{}).get('scientific_name','—')
             self.table.setItem(row,3,QTableWidgetItem(name));self.table.setItem(row,4,QTableWidgetItem(label.get('status','pending')))
+        row=self.table.currentRow()
+        if 0<=row<len(self.tracks):
+            track=self.tracks[row];label=self.training.store.label(int(track['track_id']))
+            species=self.training.store.catalog.get(label.get('species_id'),{}).get('scientific_name','Species unassigned')
+            self.track_detail.setText(f"Fish {int(track['track_id']):04d} · {track['first_s']}–{track['last_s']} s\n{species} · {label.get('status','pending')}")
 
     def open_result(self):
         path=QFileDialog.getExistingDirectory(self,'Open completed OpenFishID result',str(ROOT/'outputs'))
@@ -231,7 +236,10 @@ class Window(QMainWindow):
         self.training.select_row(n)
         t=self.tracks[n]; self.player.pause(); self.player.setPosition(round(float(t['first_s'])*1000))
         pic=QPixmap(str(self.result/'crops'/f'fish_{int(t["track_id"]):04d}.jpg')); self.crop.setPixmap(pic.scaled(280,150,Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation))
-        self.track_detail.setText(f'Fish {int(t["track_id"]):04d} · {t["first_s"]}–{t["last_s"]} s\n{t["detections"]} detected frames · peak score {t["best_confidence"]}\nUnreviewed · species unassigned')
+        label=self.training.store.label(int(t['track_id'])) if self.training.store else {}
+        species=self.training.store.catalog.get(label.get('species_id'),{}).get('scientific_name','Species unassigned') if self.training.store else 'Species unassigned'
+        review_line=species+' · '+label.get('status','pending')
+        self.track_detail.setText(f'Fish {int(t["track_id"]):04d} · {t["first_s"]}–{t["last_s"]} s\n{t["detections"]} detected frames · peak score {t["best_confidence"]}\n{review_line}')
     def filter_tracks(self,text):
         for n,t in enumerate(self.tracks):self.table.setRowHidden(n,text.strip() not in f'{int(t["track_id"]):04d}')
     @staticmethod
