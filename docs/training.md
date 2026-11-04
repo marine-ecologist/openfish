@@ -1,10 +1,10 @@
 # Training workspace
 
-Open a completed run, then choose **Training** below Viewer. Both pages show the same track order and selection. Training replaces the video area with a 2×2 crop grid. The Viewer retains its playback position when changing pages; selecting another track seeks to that track. Species and review columns display saved human labels.
+Open a completed run, then choose **Training** below Viewer. Both pages show the same track order and selection. Training offers Gallery for group labelling and Individual for a 2×2 crop grid. The Viewer retains its playback position when changing pages; selecting another track seeks to that track. Species and review columns display saved human labels.
 
-Enter a reviewer name, choose **Species confirmed** and a catalogue species, approve useful images, and click **Save track**. Alternatively choose **Unidentified** or **Exclude from training**. The starting manual catalogue is the explicit CoReFish Caribbean species crosswalk; any run prediction catalogue is also available. Model suggestions are not automatically confirmed. If the desired species is absent, leave the track unidentified until the catalogue is curated.
+Enter a reviewer name, assign species in Gallery and click **Save group**. Then use Individual to approve useful images. **Unidentifiable** and **Exclude from training** remain available as explicit outcomes. The starting manual catalogue is the explicit CoReFish Caribbean species crosswalk; any run prediction catalogue is also available. Model suggestions are not automatically confirmed. If the desired species is absent, leave the track unidentified until the catalogue is curated.
 
-Label edits and checkbox choices survive row changes and Viewer/Training navigation. Drafts are also saved on navigation and close, in `training_drafts.json`; Gallery **Save group** completes group reviews; valid Individual edits autosave into `training_labels.json`. Reopening restores saved labels and drafts. Files are bound to the track CSV and run metadata fingerprint; changed runs are rejected rather than silently relabelled. Draft writes can report disk errors; unsaved edits should be saved before closing if an error occurs.
+Label edits and checkbox choices survive row changes and Viewer/Training navigation. Drafts are also saved on navigation and close, in `training_drafts.json`; Gallery **Save group** completes group reviews; valid Individual edits autosave into `training_labels.json`. Reopening restores saved labels and drafts. Files are bound to the track CSV and run metadata fingerprint; changed runs are rejected rather than silently relabelled. Draft writes can report disk errors; resolve any reported write failure before closing.
 
 ## Two-stage workflow (0.7.1)
 
