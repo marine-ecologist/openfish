@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>OpenFishID</string>
+	<string>openfish</string>
 	<key>CFBundleExecutable</key>
-	<string>OpenFishID</string>
+	<string>openfish</string>
 	<key>CFBundleIconFile</key>
-	<string>OpenFishID.icns</string>
+	<string>openfish.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.openfishid.desktop</string>
 	<key>CFBundleName</key>
-	<string>OpenFishID</string>
+	<string>openfish</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.7.1</string>
+	<string>0.7.2</string>
 	<key>CFBundleVersion</key>
-	<string>0.7.1</string>
+	<string>0.7.2</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>13.0</string>
 	<key>NSHighResolutionCapable</key>

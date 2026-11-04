@@ -30,6 +30,13 @@ class TrainingTests(unittest.TestCase):
         with self.assertRaises(ValueError):self.store.export()
         (self.out/'tracks.csv').write_text('changed')
         with self.assertRaises(ValueError):TrainingStore(self.out,self.tracks)
+    def test_extensive_catalogue_and_global_model_separation(self):
+        self.assertGreaterEqual(len(self.store.catalog),1002)
+        self.assertIn('pterois_volitans',self.store.catalog)
+        self.assertIn('acanthurus_coeruleus',self.store.catalog)
+        (self.out/'species_predictions.json').write_text(json.dumps({'catalog':{'sebastes_melanops':{'scientific_name':'Sebastes melanops','fishial_species_id':'fixture'}}}))
+        self.assertNotIn('sebastes_melanops',TrainingStore(self.out,self.tracks).catalog)
+
     def test_group_save_is_atomic(self):
         key=next(iter(self.store.catalog))
         rows=[dict(track_id=1,status='species',species_id=key,reviewer='R',note='',approved=[]),dict(track_id=999,status='species',species_id=key,reviewer='R',note='',approved=[])]

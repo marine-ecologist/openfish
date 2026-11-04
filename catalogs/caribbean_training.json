@@ -143,6 +143,10 @@
   "myripristis_jacobus": {
     "scientific_name": "Myripristis jacobus"
   },
+  "neopomacentrus_cyanomos": {
+    "scientific_name": "Neopomacentrus cyanomos",
+    "source": "Robertson & Tornabene V5 introduction: established non-native species"
+  },
   "ocyurus_chrysurus": {
     "scientific_name": "Ocyurus chrysurus"
   },
@@ -157,6 +161,10 @@
   },
   "pseudupeneus_maculatus": {
     "scientific_name": "Pseudupeneus maculatus"
+  },
+  "pterois_volitans": {
+    "scientific_name": "Pterois volitans",
+    "source": "Robertson & Tornabene V5 introduction: established non-native species"
   },
   "remora_remora": {
     "scientific_name": "Remora remora"

@@ -1,7 +1,7 @@
 """Embedded appearance-group species review, sharing the native TrainingStore."""
 import json
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QPixmap,QStandardItemModel,QStandardItem
 from PySide6.QtWidgets import QWidget,QVBoxLayout,QHBoxLayout,QGridLayout,QLabel,QComboBox,QPushButton,QScrollArea,QFrame,QMessageBox
 from training import atomic_json
 
@@ -10,17 +10,21 @@ class TrainingGallery(QWidget):
     def __init__(self, panel):
         super().__init__();self.panel=panel;self.store=None;self.pending={};self.controls={};self.ticks={};self.group_ticks=[];self.groups=[];self.group_controls=[];self.changing=False
         layout=QVBoxLayout(self)
-        note=QLabel('Step 1 · Assign species to appearance groups, check each fish, then Save group. Similar appearance does not establish species identity. Use Unidentifiable for individual exceptions.');note.setWordWrap(True);layout.addWidget(note)
+        note=QLabel('Step 1 · Assign species to appearance groups, check each fish. Valid choices save automatically after you enter a reviewer name. Similar appearance does not establish species identity. Use Unidentifiable for individual exceptions.');note.setWordWrap(True);layout.addWidget(note)
         self.scroll=QScrollArea();self.scroll.setWidgetResizable(True);layout.addWidget(self.scroll)
 
     def choice(self):
-        box=QComboBox();box.addItem('Unreviewed · species unassigned',None)
-        for key,item in sorted(self.store.catalog.items(),key=lambda pair:pair[1]['scientific_name']):box.addItem(item['scientific_name'],key)
-        box.addItem('Unidentifiable','unidentified');return box
+        box=QComboBox();box.setModel(self.choice_model);box.setEditable(True);box.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
+        box.completer().setFilterMode(Qt.MatchFlag.MatchContains);box.completer().setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        return box
 
     def load(self, store):
         self.store=store;self.pending={};self.controls={};self.ticks={};self.group_ticks=[];self.groups=[];self.group_controls=[]
         if not store:return
+        self.choice_model=QStandardItemModel(self)
+        entries=[('Unreviewed · species unassigned',None)]+[(v['scientific_name'],k) for k,v in sorted(store.catalog.items(),key=lambda p:p[1]['scientific_name'])]+[('Unidentifiable','unidentified')]
+        for title,key in entries:
+            item=QStandardItem(title);item.setData(key,Qt.ItemDataRole.UserRole);self.choice_model.appendRow(item)
         self.path=store.out/'training_gallery_drafts.json'
         if self.path.exists():
             saved=json.loads(self.path.read_text())
@@ -35,16 +39,15 @@ class TrainingGallery(QWidget):
         content=QWidget();outer=QVBoxLayout(content)
         for number,members in enumerate(groups,1):
             section=QFrame();section.setObjectName('workflowGroup');sl=QVBoxLayout(section);header=QHBoxLayout();header.addWidget(QLabel(f'Appearance group {number} · {len(members)} fish'))
-            group_box=self.choice();header.addWidget(group_box,1);button=QPushButton('Save group');header.addWidget(button);tick=QLabel();header.addWidget(tick);sl.addLayout(header)
+            group_box=self.choice();header.addWidget(group_box,1);tick=QLabel();header.addWidget(tick);sl.addLayout(header)
             group_box.currentIndexChanged.connect(lambda _,m=members,b=group_box:self.assign(m,b.currentData()))
-            button.clicked.connect(lambda _,m=members:self.save(m));self.group_ticks.append((members,tick));self.group_controls.append((members,group_box))
+            self.group_ticks.append((members,tick));self.group_controls.append((members,group_box))
             grid=QGridLayout()
             for n,ident in enumerate(members):
                 card=QWidget();cl=QVBoxLayout(card);title=QHBoxLayout();title.addWidget(QLabel(f'Fish {ident:04d}'));saved=QLabel();title.addWidget(saved);cl.addLayout(title);self.ticks[ident]=saved
                 image=QLabel();image.setAlignment(Qt.AlignmentFlag.AlignCenter);pix=QPixmap(str(store.out/'crops'/f'fish_{ident:04d}.jpg'));image.setPixmap(pix.scaled(220,140,Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation));cl.addWidget(image)
                 choice=self.choice();choice.setMinimumWidth(160);choice.setMaximumWidth(280);cl.addWidget(choice);self.controls[ident]=choice
                 choice.currentIndexChanged.connect(lambda _,i=ident,m=members,b=choice:self.individual_choice(i,m,b.currentData()))
-                open_button=QPushButton('Select training images');open_button.clicked.connect(lambda _,i=ident:self.open_individual(i));cl.addWidget(open_button)
                 grid.addWidget(card,n//3,n%3)
             sl.addLayout(grid);outer.addWidget(section);self.groups.append(members)
         outer.addStretch();self.scroll.setWidget(content);self.refresh()
@@ -60,13 +63,18 @@ class TrainingGallery(QWidget):
         if self.changing:return
         # Human-selected propagation is a staged edit, never an automatic taxonomy inference.
         for ident in members:self.pending[ident]=value
-        self.persist();self.refresh();self.panel.refresh_rows()
+        self.persist();self.refresh();self.panel.refresh_rows();self.commit_ready()
 
     def individual_choice(self, ident, members, value):
         if self.changing:return
         if value=='unidentified' or value is None:
-            self.pending[ident]=value;self.persist();self.refresh();self.panel.refresh_rows()
+            self.pending[ident]=value;self.persist();self.refresh();self.panel.refresh_rows();self.commit_ready()
         else:self.assign(members,value)
+
+    def commit_ready(self):
+        if self.changing or not self.panel.reviewer.text().strip():return
+        members=[i for i,v in self.pending.items() if v is not None]
+        if members:self.save(members)
 
     def refresh(self):
         if not self.store:return
@@ -95,7 +103,8 @@ class TrainingGallery(QWidget):
             self.store.save_group(rows)
             for ident in members:self.pending.pop(ident,None);self.panel.drafts.pop(ident,None)
             self.persist();self.panel.refresh_rows();self.panel.reload_current();self.panel.labels_changed.emit();self.refresh()
-        except (OSError,ValueError) as exc:QMessageBox.warning(self,'Group not saved',str(exc))
+        except (OSError,ValueError) as exc:
+            self.panel.message.setText('Not saved: '+str(exc));self.panel.export_button.setEnabled(False)
 
     def open_individual(self, ident):
         row=next(n for n,t in enumerate(self.panel.tracks) if int(t['track_id'])==ident)

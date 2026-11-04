@@ -36,7 +36,7 @@ class TrainingPanel(QWidget):
         split.addWidget(left);split.addWidget(right);split.setSizes([800,500]);layout.addWidget(split,1)
         note=QLabel('Step 2 · All available images are selected initially. Deselect images you do not want to train on. Changes save automatically. Unidentifiable tracks do not enter species training.');note.setWordWrap(True);layout.addWidget(note)
         self.outcome.currentIndexChanged.connect(self.outcome_changed)
-        self.autosave_timer=QTimer(self);self.autosave_timer.setSingleShot(True);self.autosave_timer.setInterval(250);self.autosave_timer.timeout.connect(self.autosave)
+        self.autosave_timer=QTimer(self);self.autosave_timer.setSingleShot(True);self.autosave_timer.setInterval(250);self.autosave_timer.timeout.connect(self.autosave);self.autosave_timer.timeout.connect(self.gallery.commit_ready)
         for check in self.checks:check.toggled.connect(self.autosave)
         self.outcome.currentIndexChanged.connect(self.autosave)
         self.species.currentIndexChanged.connect(self.autosave)
@@ -69,6 +69,8 @@ class TrainingPanel(QWidget):
                 if saved['dataset_sha256']==self.store.fingerprint:
                     self.drafts={int(k):v for k,v in saved['drafts'].items()};self.reviewer.setText(saved.get('reviewer',''))
             except (OSError,ValueError,KeyError):pass
+        self.species.completer().setFilterMode(Qt.MatchFlag.MatchContains)
+        self.species.completer().setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.species.clear();self.species.addItem('Choose species…',None)
         for key,value in sorted(self.store.catalog.items(),key=lambda pair:pair[1]['scientific_name']):self.species.addItem(value['scientific_name'],key)
         self.table.setRowCount(len(tracks));self.refresh_rows();self.table.blockSignals(False)

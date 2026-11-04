@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory() as directory:
     panel=TrainingPanel();panel.load(out,tracks)
     assert panel.tabs.tabText(0)=='Gallery' and panel.tabs.tabText(1)=='Individual'
     assert panel.tabs.currentIndex()==0
-    panel.reviewer.setText('Fixture reviewer');gallery=panel.gallery
+    gallery=panel.gallery
     gallery.controls[1].setCurrentIndex(1);species=gallery.controls[1].currentData()
     assert gallery.controls[2].currentData()==species
     assert not panel.store.label(1) # only explicit group save confirms labels
@@ -27,7 +27,7 @@ with tempfile.TemporaryDirectory() as directory:
     assert gallery.controls[1].currentData()==species
     restored=TrainingPanel();restored.load(out,tracks)
     assert restored.gallery.pending[1]==species and restored.gallery.pending[2]=='unidentified'
-    gallery.save([1,2]);assert panel.store.label(1)['species_id']==species
+    panel.reviewer.setText('Fixture reviewer');gallery.commit_ready();assert panel.store.label(1)['species_id']==species
     assert panel.store.label(2)['status']=='unidentified'
     assert gallery.ticks[1].text()=='✓ Saved' and gallery.group_ticks[0][1].text()=='✓ All saved'
     gallery.open_individual(1);assert panel.tabs.currentIndex()==1 and panel.current==1
@@ -37,4 +37,4 @@ with tempfile.TemporaryDirectory() as directory:
     reopened=TrainingPanel();reopened.load(out,tracks);assert reopened.store.label(1)['approved']==[]
     assert not reopened.export_button.isEnabled()
     panel.close();restored.close();reopened.close()
-print('Gallery propagation, individual exception, group ticks, draft recovery and crop autosave passed')
+print('Gallery propagation, reviewer-gated autosave, exception, ticks and crop autosave passed')

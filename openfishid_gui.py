@@ -36,7 +36,7 @@ class ProjectTransfer(QThread):
 
 class Window(QMainWindow):
     def __init__(self,result=None):
-        super().__init__(); self.setWindowTitle('OpenFishID 0.7.1 · Reef fish video'); self.resize(1480,920); self.setMinimumSize(1100,720)
+        super().__init__(); self.setWindowTitle('openfish 0.7.2 · Reef fish video'); self.resize(1480,920); self.setMinimumSize(1100,720)
         self.source=None; self.result=None; self.tracks=[]; self.frames={}; self.run={}; self.pending=''; self.busy=False; self.project_busy=False; self.phase=''; self.user_scrubbing=False
         self.process=QProcess(self); self.process.setWorkingDirectory(str(ROOT)); self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.process.readyReadStandardOutput.connect(self.read_output); self.process.finished.connect(self.finished); self.process.errorOccurred.connect(self.process_error)
@@ -49,17 +49,17 @@ class Window(QMainWindow):
             dot=QLabel(); dot.setObjectName(name); dot.setFixedSize(12,12); lights.addWidget(dot)
         lights.addStretch(); sb.addLayout(lights); sb.addSpacing(25)
         brand=QHBoxLayout(); brand.setSpacing(10); logo=QLabel(); logo.setPixmap(QIcon(str(ROOT/'ui/assets/fish.svg')).pixmap(40,40)); brand.addWidget(logo)
-        names=QVBoxLayout(); names.setSpacing(1); title=QLabel('OpenFishID'); title.setObjectName('appTitle'); names.addWidget(title)
+        names=QVBoxLayout(); names.setSpacing(1); title=QLabel('openfish'); title.setObjectName('appTitle'); names.addWidget(title)
         caption=QLabel('REEF FISH VIDEO'); caption.setObjectName('appCaption'); names.addWidget(caption); brand.addLayout(names); sb.addLayout(brand); sb.addSpacing(25)
         section=QLabel('WORKSPACE'); section.setObjectName('sidebarSection'); sb.addWidget(section)
         for i,name in enumerate(['Projects','Video','Process','Viewer','Training']):
             b=QPushButton(name); b.setObjectName('sidebarNav'); b.setCheckable(True); b.clicked.connect(lambda checked=False,n=i:self.navigate(n)); self.nav.append(b); sb.addWidget(b)
             b.setToolTip({'Projects':'Reopen completed fish surveys and their exported results.','Video':'Select footage, adjust color correction, and inspect full-width original/corrected stills. Video preferences are remembered between sessions.','Process':'Choose YOLO or RF-DETR and tune detection and tracking. Hover each setting label for its purpose and the effect of raising or lowering it.','Training':'Review up to four images per track, save species labels and export reviewed training data.','Viewer':'Play annotated results, step through frames, and select a fish ID to inspect its crop and first sighting.'}[name]);b.setToolTip('<qt>'+b.toolTip()+'</qt>');b.setToolTipDuration(20000)
         sb.addStretch(); hint=QLabel('Local processing\nVideos stay on this Mac'); hint.setWordWrap(True); hint.setStyleSheet('color:#77797d;font-size:12px;'); sb.addWidget(hint)
-        version=QLabel('OpenFishID v0.7.1'); version.setObjectName('sidebarVersion'); sb.addWidget(version)
+        version=QLabel('openfish v0.7.2'); version.setObjectName('sidebarVersion'); sb.addWidget(version)
         sl.addWidget(sidebar); sl.addWidget(self.stack,1); self.setCentralWidget(shell)
         self.build_projects(); self.build_video(); self.build_process(); self.build_viewer(); self.build_training()
-        self.setStyleSheet(application_stylesheet(True)+'''QTableWidget,QListWidget{background:#1b1d1f;border:1px solid #303337;border-radius:8px;gridline-color:#303337;color:#f2f2f7;} QListWidget::item{padding:16px;} QHeaderView::section{background:#222528;color:#a8a8ad;border:0;padding:8px;} QTableWidget::item:selected,QListWidget::item:selected{background:#303337;color:white;} QVideoWidget{background:#0b0d0e;} QPushButton#primaryButton:disabled{background:#303337;border-color:#393d42;color:#77797d;}''')
+        self.setStyleSheet(application_stylesheet(True)+'''QTabBar::tab{background:#1b1d1f;color:#a8a8ad;padding:9px 22px;border:1px solid #303337;} QTabBar::tab:selected{background:#008dad;color:white;border-color:#04afc7;} QTabBar::tab:hover{border-color:#04afc7;} QPushButton#sidebarNav:checked{background:#008dad;color:white;border:1px solid #04afc7;} QTableWidget,QListWidget{background:#1b1d1f;border:1px solid #303337;border-radius:8px;gridline-color:#303337;color:#f2f2f7;} QListWidget::item{padding:16px;} QHeaderView::section{background:#222528;color:#a8a8ad;border:0;padding:8px;} QTableWidget::item:selected,QListWidget::item:selected{background:#303337;color:white;} QVideoWidget{background:#0b0d0e;} QPushButton#primaryButton:disabled{background:#303337;border-color:#393d42;color:#77797d;}''')
         self.navigate(0); self.refresh_projects(); self.statusBar().showMessage('Ready — select a video or open a completed result')
         self.refresh_timer=QTimer(self); self.refresh_timer.timeout.connect(self.refresh_projects); self.refresh_timer.start(5000)
         if result: self.load_result(Path(result)); self.navigate(3)
@@ -249,7 +249,7 @@ class Window(QMainWindow):
         if folder:self.transfer_project(lambda:import_project(folder,ROOT/'outputs/projects'),True)
 
     def open_result(self):
-        path=QFileDialog.getExistingDirectory(self,'Open completed OpenFishID result',str(ROOT/'outputs'))
+        path=QFileDialog.getExistingDirectory(self,'Open completed openfish result',str(ROOT/'outputs'))
         if path:self.load_result(Path(path))
     def load_result(self,path):
         try:
@@ -313,7 +313,7 @@ class Window(QMainWindow):
 
 def main():
     p=argparse.ArgumentParser(); p.add_argument('--result'); p.add_argument('--screenshot'); a=p.parse_args()
-    app=QApplication(sys.argv[:1]); app.setApplicationName('OpenFishID'); app.setOrganizationName('OpenFishID'); app.setWindowIcon(QIcon(str(ROOT/'OpenFishID.app/Contents/Resources/OpenFishID.icns'))); window=Window(a.result); window.show()
+    app=QApplication(sys.argv[:1]); app.setApplicationName('openfish'); app.setOrganizationName('OpenFishID'); app.setWindowIcon(QIcon(str(ROOT/'openfish.app/Contents/Resources/openfish.icns'))); window=Window(a.result); window.show()
     if a.screenshot:
         def capture():
             try:

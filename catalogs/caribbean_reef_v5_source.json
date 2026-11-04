@@ -1,0 +1,38 @@
+{
+  "title": "Reef-associated Bony Fishes of the Greater Caribbean: A Checklist (VERSION 5)",
+  "authors": [
+    "D. Ross Robertson",
+    "Luke Tornabene"
+  ],
+  "doi": "10.5281/zenodo.10225031",
+  "url": "https://zenodo.org/records/10225031",
+  "workbook_sha256": "886b690581277fbcb6fffbb2bc0feeeb37cc837a8fef5f70e2b05048e60e0983",
+  "named_reef_taxa": 1002,
+  "shallow_flagged": 862,
+  "excluded_unresolved_labels": [
+    "Uraspis helvola (secunda)",
+    "Ogilbia species A",
+    "Ogilbia species B",
+    "Elacatinus species N",
+    "Elacatinus species P",
+    "Evermannichthys species A",
+    "Genus 1 species 1",
+    "Genus 1 species 2",
+    "Genus 1 species 3",
+    "Genus 1 species 4",
+    "Genus 1 species 5",
+    "Genus 1 species 6",
+    "Lythrypnus species 3",
+    "Lipogramma species 1",
+    "Lipogramma species 2",
+    "Decodon species 2",
+    "Decodon species 3",
+    "Starksia species A",
+    "Starksia species B",
+    "Bathyanthias species A",
+    "Hypoplectrus species 2",
+    "Plectranthias species A"
+  ],
+  "scope": "Native reef-associated bony fishes; not all regional fishes. Introduced species and sharks/rays require supplements.",
+  "depth_note": "Source Deep flag uses approximately 40 m, not an exact 50 m occurrence filter. No species removed solely on this flag."
+}

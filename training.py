@@ -43,16 +43,26 @@ class TrainingStore:
         self.out = Path(out); self.tracks = {int(t['track_id']): t for t in tracks}
         self.fingerprint = dataset_identity(self.out)
         self.catalog = json.loads((Path(__file__).parent/'catalogs/caribbean_training.json').read_text())
+        regional=json.loads((Path(__file__).parent/'catalogs/caribbean_reef_v5.json').read_text())
+        self.catalog.update(regional)
         predictions = self.out/'species_predictions.json'
-        if predictions.exists(): self.catalog.update(json.loads(predictions.read_text()).get('catalog', {}))
+        if predictions.exists():
+            model_catalog=json.loads(predictions.read_text()).get('catalog',{})
+        else:model_catalog={}
         catalog_path=self.out/'training_catalog.json'
-        if catalog_path.exists():self.catalog.update(json.loads(catalog_path.read_text()))
+        pinned=json.loads(catalog_path.read_text()) if catalog_path.exists() else {}
+        self.catalog.update({k:v for k,v in pinned.items() if k in self.catalog or 'fishial_species_id' not in v})
         self.path = self.out/'training_labels.json'
         self.data = dict(schema_version=1, dataset_sha256=self.fingerprint, labels={}, history=[])
         if self.path.exists():
             self.data = json.loads(self.path.read_text())
             if self.data['dataset_sha256'] != self.fingerprint:
                 raise ValueError('Training labels belong to a changed track table or run. Restore the original run before editing.')
+        for row in self.data['labels'].values():
+            key=row.get('species_id')
+            if key not in self.catalog:
+                if key in pinned:self.catalog[key]=pinned[key]
+                elif key in model_catalog:self.catalog[key]=model_catalog[key]
         self.samples = {ident: candidates(self.out, track) for ident, track in self.tracks.items()}
 
     def label(self, ident): return self.data['labels'].get(str(ident), {})

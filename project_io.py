@@ -78,8 +78,7 @@ def export_project(results, destination, original=None):
             target=output/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(item,target)
         if not (output/'training_catalog.json').exists():
             catalog=json.loads((Path(__file__).parent/'catalogs/caribbean_training.json').read_text())
-            predictions=output/'species_predictions.json'
-            if predictions.exists():catalog.update(json.loads(predictions.read_text()).get('catalog',{}))
+            catalog.update(json.loads((Path(__file__).parent/'catalogs/caribbean_reef_v5.json').read_text()))
             (output/'training_catalog.json').write_text(json.dumps(catalog,indent=2,sort_keys=True)+'\n')
         suffix=video.suffix.lower() or '.mp4';target_video=stage/'video'/('original'+suffix);target_video.parent.mkdir();shutil.copy2(video,target_video)
         checksums={p.relative_to(stage).as_posix():sha256(p) for p in sorted(stage.rglob('*')) if p.is_file()}

@@ -52,3 +52,9 @@ QT_QPA_PLATFORM=offscreen /path/to/UI-python tests/check_training_ui.py /path/to
 ```
 
 The UI check uses a temporary run, never records test labels in the original survey, and checks synchronized selection, draft retention, save/reopen behavior and export gating.
+
+## 0.7.2: automatic Gallery saving and expanded species list
+
+The application is now named **openfish**. Gallery no longer shows per-fish Select training images buttons or group Save buttons. Enter a reviewer name, then choose species: valid selections are saved immediately, including group propagation and individual Unidentifiable exceptions. Without a reviewer, choices remain persisted drafts and ticks do not claim they are confirmed. Entering the reviewer commits valid pending choices. Individual remains accessible through the top tab; crop exclusions continue to autosave.
+
+Species dropdowns support typing to search the extensive regional list. See [catalogue provenance and coverage](../catalogs/README.md). Catalogue coverage does not expand the model's trained species coverage. The source's approximately 40 m Deep flag cannot be used as an exact 50 m cutoff, so deeper reef-associated entries remain available.

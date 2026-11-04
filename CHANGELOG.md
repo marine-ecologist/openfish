@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.2 — 2026-11-04
+
+- Renamed the visible application and macOS bundle to openfish while keeping stable preference and project identifiers.
+- Applied logo-blue selection styling to sidebar and Training tabs.
+- Removed per-fish image-navigation buttons and group Save buttons; valid Gallery selections now save automatically once a reviewer is present, preserving drafts otherwise.
+- Added 1,002 named native reef-associated bony-fish taxa from Robertson & Tornabene V5, with provenance and depth flags, plus retained legacy entries and two established non-native supplements.
+- Added searchable shared-model Gallery dropdowns to keep the expanded catalogue practical and avoid duplicating thousands of entries per widget.
+
+
 ## 0.7.1 — 2026-11-04
 
 - Added embedded Gallery and Individual tabs at the top of Training; Gallery defaults to existing appearance groups.
