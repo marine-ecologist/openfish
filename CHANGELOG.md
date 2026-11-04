@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.3 — 2026-11-04
+
+- Added separate manual parrotfish visual-phase annotation in Training Gallery and Individual, with Viewer/track-table columns and autosaving.
+- Added juvenile, initial, terminal, transitional appearance, uncertain and unassessed options; non-parrotfish/unidentified tracks use Not applicable.
+- Phase is per fish, never propagated with group species; changing species resets it safely.
+- Retained phase in review history, portable projects and training CSV/JSON exports; old labels receive unassessed/Not applicable defaults.
+- Added regression checks for phase applicability, legacy migration, export round trips and cross-view editing. No automated phase classifier or sex inference is introduced.
+
+
 ## 0.7.2 — 2026-11-04
 
 - Renamed the visible application and macOS bundle to openfish while keeping stable preference and project identifiers.

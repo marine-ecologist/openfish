@@ -10,6 +10,7 @@ from ui.theme import application_stylesheet
 from ui.settings_panels import ColorPanel,TrackingPanel
 from fish_settings import normalize_settings
 from ui.training_panel import TrainingPanel
+from fish_phase import PHASE_DISPLAY
 from project_io import export_project, import_project, result_folder, source_video
 
 ROOT=Path(__file__).resolve().parent
@@ -36,7 +37,7 @@ class ProjectTransfer(QThread):
 
 class Window(QMainWindow):
     def __init__(self,result=None):
-        super().__init__(); self.setWindowTitle('openfish 0.7.2 · Reef fish video'); self.resize(1480,920); self.setMinimumSize(1100,720)
+        super().__init__(); self.setWindowTitle('openfish 0.7.3 · Reef fish video'); self.resize(1480,920); self.setMinimumSize(1100,720)
         self.source=None; self.result=None; self.tracks=[]; self.frames={}; self.run={}; self.pending=''; self.busy=False; self.project_busy=False; self.phase=''; self.user_scrubbing=False
         self.process=QProcess(self); self.process.setWorkingDirectory(str(ROOT)); self.process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         self.process.readyReadStandardOutput.connect(self.read_output); self.process.finished.connect(self.finished); self.process.errorOccurred.connect(self.process_error)
@@ -56,7 +57,7 @@ class Window(QMainWindow):
             b=QPushButton(name); b.setObjectName('sidebarNav'); b.setCheckable(True); b.clicked.connect(lambda checked=False,n=i:self.navigate(n)); self.nav.append(b); sb.addWidget(b)
             b.setToolTip({'Projects':'Reopen completed fish surveys and their exported results.','Video':'Select footage, adjust color correction, and inspect full-width original/corrected stills. Video preferences are remembered between sessions.','Process':'Choose YOLO or RF-DETR and tune detection and tracking. Hover each setting label for its purpose and the effect of raising or lowering it.','Training':'Review up to four images per track, save species labels and export reviewed training data.','Viewer':'Play annotated results, step through frames, and select a fish ID to inspect its crop and first sighting.'}[name]);b.setToolTip('<qt>'+b.toolTip()+'</qt>');b.setToolTipDuration(20000)
         sb.addStretch(); hint=QLabel('Local processing\nVideos stay on this Mac'); hint.setWordWrap(True); hint.setStyleSheet('color:#77797d;font-size:12px;'); sb.addWidget(hint)
-        version=QLabel('openfish v0.7.2'); version.setObjectName('sidebarVersion'); sb.addWidget(version)
+        version=QLabel('openfish v0.7.3'); version.setObjectName('sidebarVersion'); sb.addWidget(version)
         sl.addWidget(sidebar); sl.addWidget(self.stack,1); self.setCentralWidget(shell)
         self.build_projects(); self.build_video(); self.build_process(); self.build_viewer(); self.build_training()
         self.setStyleSheet(application_stylesheet(True)+'''QTabBar::tab{background:#1b1d1f;color:#a8a8ad;padding:9px 22px;border:1px solid #303337;} QTabBar::tab:selected{background:#008dad;color:white;border-color:#04afc7;} QTabBar::tab:hover{border-color:#04afc7;} QPushButton#sidebarNav:checked{background:#008dad;color:white;border:1px solid #04afc7;} QTableWidget,QListWidget{background:#1b1d1f;border:1px solid #303337;border-radius:8px;gridline-color:#303337;color:#f2f2f7;} QListWidget::item{padding:16px;} QHeaderView::section{background:#222528;color:#a8a8ad;border:0;padding:8px;} QTableWidget::item:selected,QListWidget::item:selected{background:#303337;color:white;} QVideoWidget{background:#0b0d0e;} QPushButton#primaryButton:disabled{background:#303337;border-color:#393d42;color:#77797d;}''')
@@ -192,7 +193,7 @@ class Window(QMainWindow):
         self.frame_label=QLabel('Frame —'); self.frame_label.setObjectName('pageSubtitle'); vl.addWidget(self.frame_label)
         right=QWidget(); rl=QVBoxLayout(right); rl.setContentsMargins(12,0,0,0); title=QLabel('Fish tracks'); title.setStyleSheet('font-size:17px;font-weight:650'); rl.addWidget(title)
         self.search=QLineEdit(); self.search.setPlaceholderText('Find ID…'); self.search.textChanged.connect(self.filter_tracks); rl.addWidget(self.search)
-        self.table=QTableWidget(0,5); self.table.setHorizontalHeaderLabels(['ID','First seen','Frames','Species','Review']); self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch); self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows); self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection); self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers); self.table.itemSelectionChanged.connect(self.track_selected); rl.addWidget(self.table,1)
+        self.table=QTableWidget(0,6); self.table.setHorizontalHeaderLabels(['ID','First seen','Frames','Species','Review','Phase']); self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch); self.table.verticalHeader().hide(); self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows); self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection); self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers); self.table.itemSelectionChanged.connect(self.track_selected); rl.addWidget(self.table,1)
         self.crop=QLabel('Select a track'); self.crop.setAlignment(Qt.AlignmentFlag.AlignCenter); self.crop.setFixedHeight(160); self.crop.setObjectName('mediaPreview'); rl.addWidget(self.crop)
         self.track_detail=QLabel('Provisional sighting IDs\nSpecies unassigned'); self.track_detail.setWordWrap(True); self.track_detail.setObjectName('pageSubtitle'); rl.addWidget(self.track_detail)
         split.addWidget(left); split.addWidget(right); split.setSizes([900,300]); l.addWidget(split,1)
@@ -210,6 +211,7 @@ class Window(QMainWindow):
             label=self.training.store.label(int(track['track_id']))
             name=self.training.store.catalog.get(label.get('species_id'),{}).get('scientific_name','—')
             self.table.setItem(row,3,QTableWidgetItem(name));self.table.setItem(row,4,QTableWidgetItem(('✓ '+label.get('status','pending')) if label else 'pending'))
+            self.table.setItem(row,5,QTableWidgetItem(PHASE_DISPLAY.get(label.get('phase'),'—')))
         row=self.table.currentRow()
         if 0<=row<len(self.tracks):
             track=self.tracks[row];label=self.training.store.label(int(track['track_id']))

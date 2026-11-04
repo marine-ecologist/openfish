@@ -22,6 +22,7 @@ class ProjectTests(unittest.TestCase):
         self.store.save(1,'species',species,'Reviewer','Verified',[self.store.samples[1][0]['sha256']])
         (self.run/'training_drafts.json').write_text(json.dumps(dict(dataset_sha256=self.store.fingerprint,drafts={})))
     def test_move_round_trip_and_reexport_after_edits(self):
+        self.store.save(1,'species','sparisoma_viride','Reviewer','Phase checked',[self.store.samples[1][0]['sha256']],phase='terminal')
         fingerprint=dataset_identity(self.run);package=export_project(self.run,self.root/'package')
         self.video.unlink();shutil.rmtree(self.run)
         (package/'.DS_Store').write_bytes(b'Finder metadata')
@@ -29,7 +30,7 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual(dataset_identity(results),fingerprint)
         self.assertEqual(source_video(results),imported/'video/original.mp4')
         self.assertEqual(source_video(results).read_bytes(),b'original video fixture')
-        store=TrainingStore(results,[dict(track_id=1)]);self.assertTrue(store.complete);self.assertTrue(store.export().exists())
+        store=TrainingStore(results,[dict(track_id=1)]);self.assertEqual(store.label(1)['phase'],'terminal');self.assertTrue(store.complete);self.assertTrue(store.export().exists())
         store.save(1,'unidentified',None,'Second reviewer','Uncertain',[])
         # Edited local project is exported afresh, with updated checksums.
         newer=export_project(results,self.root/'new-package')
